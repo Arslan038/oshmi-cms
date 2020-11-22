@@ -1,6 +1,6 @@
 <template>
-  <div class="hello">
-     <b-container style="padding-bottom:4rem;" class=" pr-5 pl-5 pt-3 bg-header" fluid>
+  <div>
+     <b-container style="padding-bottom:4rem;" class="d-md-block d-lg-block d-none pr-5 pl-5 pt-3 bg-header" fluid>
        <b-container class="pl-0 pr-0">
        <div class="d-none d-md-flex">
          <!-- <img class="center-block"
@@ -55,6 +55,32 @@
          </b-row>
        </div>
        </b-container>
+     </b-container>
+     <b-container  style="min-height:120px;" class="p-1 bg-header d-block d-md-none d-lg-none" fluid  >
+        <b-navbar toggleable="lg" type="dark" >
+          <b-navbar-brand href="#">NavBar</b-navbar-brand>
+
+          <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+
+          <b-collapse id="nav-collapse" is-nav>
+            <b-navbar-nav>
+              <b-nav-item to="/dashboard">Dashboard</b-nav-item>
+              <b-nav-item to="/courses" >Courses</b-nav-item>
+              <b-nav-item to="/members" >Members</b-nav-item>
+              <b-nav-item to="/attendance" >Attendance</b-nav-item>
+              <b-nav-item to="/news" >News</b-nav-item>
+              <b-nav-item to="/messages" >Messages</b-nav-item>
+
+            </b-navbar-nav>
+
+            <!-- Right aligned nav items -->
+            <b-navbar-nav class="ml-auto">
+              
+
+             
+            </b-navbar-nav>
+          </b-collapse>
+        </b-navbar>
      </b-container>
   </div>
 </template>

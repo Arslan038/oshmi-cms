@@ -101,6 +101,9 @@ td {
     background: #a37be5 !important;
     color:white !important;
 }
+.router-link-active{
+  color:#a37be5 !important;
+}
 .text-purple{
   color:#a37be5 !important;
 }
