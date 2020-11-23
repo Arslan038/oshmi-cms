@@ -13,6 +13,8 @@ import AddBooking from '../views/AddBooking.vue'
 import Categories from '../views/Categories.vue'
 import Tutors from '../views/Tutors.vue'
 import AddTutor from '../views/AddTutor.vue'
+import Members from '../views/Members.vue'
+import MemberInfo from '../views/MemberInfo.vue'
 
 
 
@@ -23,6 +25,22 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: Dashboard,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/members',
+    name: 'Members',
+    component: Members,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/member-info',
+    name: 'MemberInfo',
+    component: MemberInfo,
     meta: {
       requiresAuth: true,
     }
