@@ -18,18 +18,18 @@
          <b-row>
             <b-col md="1" cols="12" class="text-md-left  mr-md-4 ">
               <router-link to="/dashboard">
-               <span :class="active_route=='Users' ? 'text-purple': 'text-gray'">Dashboards</span>
+               <span :class="active_route=='Users' ? 'text-purple': 'text-gray'">Dashboard</span>
               </router-link>
             </b-col>
             
             <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">
                <router-link to="/courses">
-                 <span :class="active_route=='Courses' ? 'text-purple': 'text-gray'">Courses</span> 
+                 <span :class="$route.name=='Courses' ? 'text-purple': 'text-gray'">Courses</span> 
                </router-link>
             </b-col>
             <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">
-               <router-link to="/members">
-                 <span :class="active_route=='Orders' ? 'text-purple': 'text-gray'">Members</span> 
+               <router-link to="/members" >
+                 <span :class="$route.name=='Members' ? 'text-purple': 'text-gray'">Members</span> 
                </router-link>
             </b-col>
             <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">
