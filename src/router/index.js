@@ -15,6 +15,13 @@ import Tutors from '../views/Tutors.vue'
 import AddTutor from '../views/AddTutor.vue'
 import Members from '../views/Members.vue'
 import MemberInfo from '../views/MemberInfo.vue'
+import CorporateMembers from '../views/CorporateMembers.vue'
+import AddCorporate from '../views/AddCorporate.vue'
+import Attendance from '../views/Attendance.vue'
+import CorporateAttendance from '../views/CorporateAttendance.vue'
+import NewsBlog from '../views/NewsBlog.vue'
+import AddNews from '../views/AddNews.vue'
+
 
 
 
@@ -41,6 +48,56 @@ const routes = [
     path: '/member-info',
     name: 'MemberInfo',
     component: MemberInfo,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  
+  {
+    path: '/news-blog',
+    name: 'NewsBlog',
+    component: NewsBlog,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/add-news',
+    name: 'AddNews',
+    component: AddNews,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/corporate-attendance',
+    name: 'CorporateAttendance',
+    component: CorporateAttendance,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/attendance',
+    name: 'Attendance',
+    component: Attendance,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/corporate-members',
+    name: 'CorporateMembers',
+    component: CorporateMembers,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  
+  {
+    path: '/add-corporate',
+    name: 'AddCorporate',
+    component: AddCorporate,
     meta: {
       requiresAuth: true,
     }

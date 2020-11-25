@@ -16,30 +16,30 @@
        </div>
        <div class="mt-2">
          <b-row>
-            <b-col md="1" cols="12" class="text-md-left  mr-md-4 ">
+            <b-col md="1" cols="12" class="text-md-left  mr-md-4 " @click="active_route='Dashboard'">
               <router-link to="/dashboard">
-               <span :class="active_route=='Users' ? 'text-purple': 'text-gray'">Dashboard</span>
+               <span :class="active_route=='Dashboard' ? 'text-purple': 'text-gray'">Dashboard</span>
               </router-link>
             </b-col>
             
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="active_route='Courses'">
                <router-link to="/courses">
-                 <span :class="$route.name=='Courses' ? 'text-purple': 'text-gray'">Courses</span> 
+                 <span :class="active_route=='Courses' ? 'text-purple': 'text-gray'">Courses</span> 
                </router-link>
             </b-col>
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="active_route='Members'">
                <router-link to="/members" >
-                 <span :class="$route.name=='Members' ? 'text-purple': 'text-gray'">Members</span> 
+                 <span :class="active_route=='Members' ? 'text-purple': 'text-gray'">Members</span> 
                </router-link>
             </b-col>
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="active_route='Attendance'">
                <router-link to="/attendance">
-                 <span :class="active_route=='Orders' ? 'text-purple': 'text-gray'">Attendance</span> 
+                 <span :class="active_route=='Attendance' ? 'text-purple': 'text-gray'">Attendance</span> 
                </router-link>
             </b-col>
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 pr-md-0 ml-md-2 ">
-               <router-link to="/news">
-                 <span :class="active_route=='Orders' ? 'text-purple': 'text-gray'">News</span> 
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 pr-md-0 ml-md-2 " @click="active_route='News'" >
+               <router-link to="/news-blog">
+                 <span :class="active_route=='News' ? 'text-purple': 'text-gray'">News</span> 
                </router-link>
             </b-col>
              <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">

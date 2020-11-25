@@ -3,7 +3,7 @@
     <b-container class="pr-3 pt-3  pl-3  mt--50 pb-1 bg-white card shadow" style="border:1px solid #dcdcdc">
       <b-row>
          <b-col>
-           <div class="text-left text-light-gray"> <h5>Members</h5> </div>
+           <div class="text-left text-light-gray"> <h5>{{title}}</h5> </div>
            <div>
             <b-breadcrumb class="bg-white">
               <b-breadcrumb-item href="">
@@ -36,9 +36,8 @@
 <script>
 export default {
   name: 'SecondaryHeader',
-  props: {
-    msg: String
-  },
+  
+  props:['title'],
   data(){
     return {
       series: [{

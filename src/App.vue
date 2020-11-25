@@ -73,6 +73,9 @@ td {
   font-weight: bold;
   color: #2c3e50;
 }
+.rounds{
+  border-radius:12px !important;
+}
 
 #nav a.router-link-exact-active {
   color: #42b983;
@@ -89,6 +92,25 @@ td {
   background:#7ed321 !important;
   border-color:#7ed321 !important;
 }
+.btn-outline-success{
+  color: #fff;
+  background-color: white !important;
+  border-color: #7ed321 !important;
+}
+.btn-warning{
+  color: #fff !important;
+  background-color: red !important;
+  border-color: red !important;
+}
+
+
+.btn-outline-success:hover {
+  color: white !important;
+  background-color: #7ed321 !important;
+  border-color: #7ed321 !important;
+}
+
+
 .badge-danger {
   background:#7ed321 !important;
   color:white !important;
