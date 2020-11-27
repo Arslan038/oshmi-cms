@@ -21,8 +21,8 @@ import Attendance from '../views/Attendance.vue'
 import CorporateAttendance from '../views/CorporateAttendance.vue'
 import NewsBlog from '../views/NewsBlog.vue'
 import AddNews from '../views/AddNews.vue'
-
-
+import Messages from '../views/Messages.vue'
+import AddMessages from '../views/AddMessages.vue'
 
 
 Vue.use(VueRouter)
@@ -73,6 +73,22 @@ const routes = [
     path: '/corporate-attendance',
     name: 'CorporateAttendance',
     component: CorporateAttendance,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/add-messages',
+    name: 'AddMessages',
+    component: AddMessages,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
+    path: '/messages',
+    name: 'Messages',
+    component: Messages,
     meta: {
       requiresAuth: true,
     }

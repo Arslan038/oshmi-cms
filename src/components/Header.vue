@@ -16,41 +16,28 @@
        </div>
        <div class="mt-2">
          <b-row>
-            <b-col md="1" cols="12" class="text-md-left  mr-md-4 " @click="active_route='Dashboard'">
-              <router-link to="/dashboard">
+            <b-col md="1" cols="12" style="cursor:pointer;" class="text-md-left  mr-md-4 " @click="reRoute('/dashboard','Dashboard')">
                <span :class="active_route=='Dashboard' ? 'text-purple': 'text-gray'">Dashboard</span>
-              </router-link>
             </b-col>
             
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="active_route='Courses'">
-               <router-link to="/courses">
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="reRoute('/courses','Courses')">
                  <span :class="active_route=='Courses' ? 'text-purple': 'text-gray'">Courses</span> 
-               </router-link>
             </b-col>
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="active_route='Members'">
-               <router-link to="/members" >
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="reRoute('/members','Members')">
                  <span :class="active_route=='Members' ? 'text-purple': 'text-gray'">Members</span> 
-               </router-link>
             </b-col>
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="active_route='Attendance'">
-               <router-link to="/attendance">
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 " @click="reRoute('/attendance','Attendance')">
                  <span :class="active_route=='Attendance' ? 'text-purple': 'text-gray'">Attendance</span> 
-               </router-link>
             </b-col>
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 pr-md-0 ml-md-2 " @click="active_route='News'" >
-               <router-link to="/news-blog">
+             <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ml-md-2" @click="reRoute('/messages','Messages')">
+                 <span :class="active_route=='Messages' ? 'text-purple': 'text-gray'">Messages</span> 
+            </b-col>
+            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 pr-md-0 ml-md-2 " @click="reRoute('/news-blog','News')"  >
                  <span :class="active_route=='News' ? 'text-purple': 'text-gray'">News</span> 
-               </router-link>
             </b-col>
-             <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ">
-               <router-link to="/messages">
-                 <span :class="active_route=='Orders' ? 'text-purple': 'text-gray'">Messages</span> 
-               </router-link>
-            </b-col>
+
             <b-col  md="5" cols="12" style="cursor:pointer;" class="text-md-right pl-md-0 ">
-               <!-- <router-link to="/orders"> -->
                  <span :class="'text-gray'" @click="logOut">Logout</span> 
-               <!-- </router-link> -->
             </b-col>
          </b-row>
        </div>
@@ -90,14 +77,28 @@ export default {
   name: 'Header',
   computed:{
   },
+  created(){
+    if(localStorage.getItem("setroute")==null){
+      localStorage.setItem("setroute",'Dashboard')
+
+    }
+  },
   data(){
     return {
-      active_route:'Courses'
+      active_route:localStorage.getItem("setroute")!=null ? localStorage.getItem("setroute"):'Dashboard'
     }
   },
   methods:{
+    reRoute(route,val){
+      localStorage.setItem("setroute",val)
+      this.active_route=val
+      this.$router.push(route)
+      
+    },
     logOut(){
-       this.$store.commit("logout")
+      this.$router.push('/')
+      localStorage.removeItem("setroute")
+
     }
   }
 }

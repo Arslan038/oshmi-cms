@@ -9,6 +9,11 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'native-toast/dist/native-toast.css'
 import 'ant-design-vue/dist/antd.css';
 
+import FullCalendar from 'vue-full-calendar'
+import "fullcalendar/dist/fullcalendar.min.css";
+
+
+
 import { Upload,Icon   } from 'ant-design-vue';
 
 import JsonCSV from 'vue-json-csv'
@@ -19,6 +24,7 @@ Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(Upload);
 Vue.use(Icon);
+Vue.use(FullCalendar);
 
  
 Vue.use(VueApexCharts)
