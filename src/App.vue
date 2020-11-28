@@ -13,6 +13,29 @@ export default {
 </script>
 
 <style>
+@media only screen  and (min-width : 1224px) {
+ .mdwidths{
+      max-width:55% !important;
+      flex:0 0 55% !important;
+  }
+  .md-members-widths{
+    flex: 0 0 82% !important;
+    max-width: 82% !important;
+  }  
+ 
+}
+
+@media only screen  and (min-width : 1824px) {
+  .mdwidths{
+      max-width:55% !important;
+      flex:0 0 55% !important;
+  }  
+  .md-members-widths{
+    flex: 0 0 82% !important;
+    max-width: 82% !important;
+  }  
+
+}
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px) {
   .mt-xs-1{
       margin-top:1rem !important;

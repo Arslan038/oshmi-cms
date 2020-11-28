@@ -41,7 +41,7 @@
                 </b-col>
             </b-row>
 
-            <b-row class="mt-2">
+            <b-row class="mt-4">
                 <b-col md="2" class="text-left">
                     <b>Address</b>
                 </b-col>

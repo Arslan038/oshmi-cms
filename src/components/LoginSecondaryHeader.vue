@@ -55,7 +55,7 @@ export default {
     },
     methods:{
       async validate_auth() {
-            this.$router.push({path:'/courses'})
+            this.$router.push({path:'/dashboard'})
 
         
       },

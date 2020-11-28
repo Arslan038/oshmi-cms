@@ -68,9 +68,9 @@
       <b-row >
         <b-col md="6" cols="12">
           <h6 class="text-muted text-left mt-md-0 mt-2"> <b>Ipad status</b> </h6>
-          <h6 class="text-left"> <b>1. Display Candidate Info</b> </h6>
-          <h6 class="text-left"> <b>2. Signature Status</b> </h6>
-          <h6 class="text-left"> <b>3. Photo Status</b> </h6>
+          <h6 class="text-left mt-3"> <b>1. Display Candidate Info</b> </h6>
+          <h6 class="text-left mt-3"> <b>2. Signature Status</b> </h6>
+          <h6 class="text-left mt-3"> <b>3. Photo Status</b> </h6>
           <div class="d-flex">
             <div>
                <img src="/signature.PNG" alt="">

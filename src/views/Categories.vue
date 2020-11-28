@@ -48,7 +48,7 @@
                             <span class="smalls">{{data.item.no_course}}</span>
                         </template>
                         <template v-slot:cell(action)="data">
-                            <span class="smalls"><i class="fas fa-trash text-danger"></i></span>
+                            <span v-b-modal.del-modal class="smalls"><i class="fas fa-trash text-danger"></i></span>
 
                         </template>
                     </b-table>
@@ -67,6 +67,20 @@
                 </b-col>
             </b-row>
         </b-container>
+        <b-modal id="del-modal"   hide-footer centered>
+            <b-container class="text-center">
+                <p> <b>Are you sure to delete the following category ?</b> </p>
+                <h5 class="text-purple">Environment</h5>
+                <div>
+                <b-button size="lg" variant="danger" pill>
+                    Yes
+                </b-button>
+                <b-button class="ml-3" size="lg" variant="danger" pill>
+                    Cancel
+                </b-button>
+                </div>
+            </b-container>
+        </b-modal>
     </div>
 </template>
 

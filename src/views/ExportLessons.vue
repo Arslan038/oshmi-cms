@@ -44,7 +44,7 @@
                 </b-col>
             </b-row>
 
-            <div>
+            <div class="mt-3">
                 <b-table :responsive="true" bordered :fields="fields" :items="view_able_orders">
                     <template v-slot:head(student_name)="data">
                         <span class="smalls">{{data.label}}</span>

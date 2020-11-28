@@ -8,7 +8,7 @@
         addtext="Add"
         reroute="/add-corporate"
       />
-      <div class="mt-2 text-left text-primary">
+      <div class="mt-4 text-left text-primary">
         <h4 class="text-purple">Members</h4>
       </div>
 
@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <div>
+      <div class="mt-3">
          <b-table :responsive="true" :fields="fields" :items="members_data">
            
             <template v-slot:head(company_name)="data">
@@ -77,7 +77,7 @@
             
             <template v-slot:cell(action)="data">
                <router-link to="/member-info"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link> 
-              <span class="smalls"><i class="fas fa-trash text-danger"></i></span>
+              <span class="smalls" v-b-modal.del-modal><i class="fas fa-trash text-danger"></i></span>
 
             </template>
         </b-table>
@@ -93,6 +93,20 @@
         </div>
       </div>
     </b-container>
+    <b-modal id="del-modal" hide-footer centered>
+            <b-container class="text-center">
+                <p> <b>Are you sure to delete the following member ?</b> </p>
+                <h5 class="text-purple">Gammon Ltd</h5>
+                <div>
+                <b-button size="lg" variant="danger" pill>
+                    Yes
+                </b-button>
+                <b-button class="ml-3" size="lg" variant="danger" pill>
+                    Cancel
+                </b-button>
+                </div>
+            </b-container>
+        </b-modal>
 
   </div>
 </template>

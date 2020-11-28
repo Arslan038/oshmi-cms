@@ -5,7 +5,7 @@
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="true" addtext="Add Tutors" reroute="/add-tutor" />
 
-            <div class="mt-2 text-left text-primary">
+            <div class="mt-4 text-left text-primary">
                 <h4 class="text-purple">My Tutors</h4>
             </div>
 
@@ -21,7 +21,7 @@
                 </div>
             </div>
 
-            <div>
+            <div class="mt-3">
                 <b-table :responsive="true" striped hover :fields="fields" :items="view_able_orders">
                    
                     <template v-slot:head(tutor_name)="data">
@@ -82,7 +82,7 @@
                     <template v-slot:cell(action)="data">
 
                         <i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i>
-                        <i class="fas fa-trash text-danger"></i>
+                        <i v-b-modal.del-modal class="fas fa-trash text-danger"></i>
 
                     </template>
                 </b-table>
@@ -92,6 +92,20 @@
                 </div>
             </div>
         </b-container>
+        <b-modal id="del-modal"   hide-footer centered>
+            <b-container class="text-center">
+                <p> <b>Are you sure to delete the following tutor ?</b> </p>
+                <h5 class="text-purple">Chi man</h5>
+                <div>
+                <b-button size="lg" variant="danger" pill>
+                    Yes
+                </b-button>
+                <b-button class="ml-3" size="lg" variant="danger" pill>
+                    Cancel
+                </b-button>
+                </div>
+            </b-container>
+        </b-modal>
     </div>
 </template>
 

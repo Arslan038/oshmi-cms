@@ -5,7 +5,7 @@
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="false" />
 
-            <div class="mt-2 text-left text-primary">
+            <div class="mt-4 text-left text-primary">
                 <h4 class="text-purple">Upcoming Lessons</h4>
             </div>
 
@@ -21,7 +21,7 @@
                 </div>
             </div>
 
-            <div>
+            <div class="mt-3">
                 <b-table :responsive="true" striped hover :fields="fields" :items="view_able_orders">
                     <template v-slot:head(course_title)="data">
                         <span class="smalls">Course Title</span>

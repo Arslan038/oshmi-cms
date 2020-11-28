@@ -4,7 +4,7 @@
         <SecondaryHeader msg="Welcome to Your Vue.js App" />
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="true" addtext="Create course" reroute="/create-courses" />
-            <div class="mt-2 text-left text-primary">
+            <div class="mt-4 text-left text-primary">
                 <h4 class="text-purple">My Course</h4>
             </div>
 
@@ -16,11 +16,11 @@
                     <input class="border-hids form-control col-md-12" />
                 </div>
                 <div class="ml-auto">
-                    <b-button variant="info" class="pr-3 pl-3" pill @click="$bvModal.show('actions')">Export</b-button>
+                    <b-button variant="info" class="pr-3 pl-3" pill @click="$bvModal.show('add-period-modal')">Export</b-button>
                 </div>
             </div>
 
-            <div>
+            <div class="mt-3">
                 <b-table :responsive="true" striped hover :fields="fields" :items="view_able_orders">
                     <template v-slot:head(CourseTitle)="data">
                         <span class="smalls">Course Title</span>
@@ -57,7 +57,7 @@
                         <span class="smalls">{{data.item.location}}</span>
                     </template>
                     <template v-slot:cell(periods)="data">
-                        <span class="smalls">{{data.item.periods}} <i class="fas fa-plus-circle"></i></span>
+                        <span class="smalls">{{data.item.periods}} <i v-b-modal.add-period-modal class="fas fa-plus-circle"></i></span>
                     </template>
 
                     <template v-slot:cell(status)="data">
@@ -68,7 +68,7 @@
                     <template v-slot:cell(action)="data">
                         <i class="fas fa-copy text-primary"></i>
                         <router-link to="/edit-courses"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link>
-                        <i class="fas fa-trash text-danger"></i>
+                        <i v-b-modal.del-modal class="fas fa-trash text-danger"></i>
                     </template>
                 </b-table>
 
@@ -77,7 +77,7 @@
                 </div>
             </div>
         </b-container>
-        <b-modal id="actions" hide-footer size="xl">
+        <b-modal id="add-period-modal" hide-footer size="xl">
             <b-container>
                 <b-table bordered responsive :items="new_items" :fields="create_course_heads">
                     <template v-slot:head(start_date)="data">
@@ -147,6 +147,22 @@
                 </div>
             </b-container>
         </b-modal>
+        <b-modal id="del-modal"   hide-footer centered>
+            <b-container class="text-center">
+                <p> <b>Are you sure to delete the following course ?</b> </p>
+                <h5 class="text-purple">演示内容 演示内容 演示内容</h5>
+                <div>
+                <b-button size="lg" variant="danger" pill>
+                    Yes
+                </b-button>
+                <b-button class="ml-3" size="lg" variant="danger" pill>
+                    Cancel
+                </b-button>
+                </div>
+            </b-container>
+
+            </b-modal>
+
     </div>
 </template>
 

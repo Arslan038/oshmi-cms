@@ -5,7 +5,7 @@
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="true" addtext="Add Booking" reroute="/add-booking" />
 
-            <div class="mt-2 text-left text-primary">
+            <div class="mt-4 text-left text-primary">
                 <h4 class="text-purple">Bookings</h4>
             </div>
 
@@ -21,7 +21,7 @@
                 </div>
             </div>
 
-            <div>
+            <div class="mt-3">
                 <b-table :responsive="true" striped hover :fields="fields" :items="view_able_orders">
                     <template v-slot:head(booking_id)="data">
                         <span class="smalls">{{data.label}}</span>

@@ -8,7 +8,7 @@
         addtext="Add"
         reroute="/create-courses"
       />
-      <div class="mt-2 text-left text-primary">
+      <div class="mt-4 text-left text-primary">
         <h4 class="text-purple">Members</h4>
       </div>
 
@@ -30,7 +30,7 @@
         </div>
       </div>
 
-      <div>
+      <div class="mt-3">
          <b-table :responsive="true" :fields="fields" :items="members_data">
             <template v-slot:head(member_id)="data">
                 <span class="smalls">{{ data.label }}</span>
