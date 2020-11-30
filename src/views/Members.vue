@@ -31,7 +31,7 @@
       </div>
 
       <div class="mt-3">
-         <b-table :responsive="true" :fields="fields" :items="members_data">
+         <b-table bordered :responsive="true" :fields="fields" :items="members_data">
             <template v-slot:head(member_id)="data">
                 <span class="smalls">{{ data.label }}</span>
             </template>

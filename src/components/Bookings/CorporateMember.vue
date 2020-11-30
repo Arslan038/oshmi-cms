@@ -10,8 +10,8 @@
         </div>
 
         <div>
-            <div>
-                <b-table :responsive="true" :fields="corporate_head" :items="corporate_data">
+            <div class="mt-3">
+                <b-table bordered :responsive="true" :fields="corporate_head" :items="corporate_data">
                     <template v-slot:head(action)="data">
                         <b-checkbox></b-checkbox>
                     </template>

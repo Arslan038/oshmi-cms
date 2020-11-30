@@ -45,7 +45,11 @@
      </b-container>
      <b-container  style="min-height:120px;" class="p-1 bg-header d-block d-md-none d-lg-none" fluid  >
         <b-navbar toggleable="lg" type="dark" >
-          <b-navbar-brand href="#">NavBar</b-navbar-brand>
+          <b-navbar-brand href="#">
+             <img class="center-block"
+               width="120"
+          alt="Vue logo" src="../assets/logos.png">
+          </b-navbar-brand>
 
           <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 

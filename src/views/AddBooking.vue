@@ -21,7 +21,7 @@
                         <h6><b>Select Student type</b></h6>
                     </b-col>
                     <b-col md="6" cols="12">
-                        <select v-model="selected" class="form-control">
+                        <select v-model="selected" class="roundeds form-control">
                             <option value="new_student">New student member</option>
                             <option value="existing_Student">Exisiting student member</option>
                             <option value="new_corporate">New corporate member</option>
@@ -50,10 +50,10 @@
             <b-modal centered id="added" hide-footer>
                 <h6 class="text-center">The booking(s) has been added successfully</h6>
                 <div class="text-center mt-4">
-                    <b-button pill class="pr-5 pl-5" variant="secondary">
+                    <b-button pill class="pr-5 pl-5" variant="danger">
                         Yes
                     </b-button>
-                    <b-button pill class="p20 ml-2" variant="secondary">
+                    <b-button pill class="p20 ml-2" variant="danger">
                         Cancel
                     </b-button>
                 </div>

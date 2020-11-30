@@ -18,7 +18,7 @@
         </div>
        
         <div class="ml-md-2 mt-md-0 mt-3">
-          <b-button variant="outline-secondary" class="pr-2 pl-2"  @click="$router.push('/addnews')" >Show on date</b-button>
+          <b-button variant="outline-secondary" class="pr-2 pl-2" >Show on date</b-button>
         </div>
       
       </div>

@@ -19,7 +19,7 @@
        
       </div>
 
-      <div class="mt-5">"",
+      <div class="mt-5">
        
          <b-table bordered :responsive="true" :fields="fields" :items="members_data">
             <template v-slot:head(text_content)="data">
@@ -55,7 +55,7 @@
             </template>
             <template v-slot:cell(action)="data">
               
-                 <b-button variant="outline-success" class="ml-1 rounds">
+                 <b-button v-b-modal.delact variant="outline-success" class="ml-1 rounds">
                   Delete
                 </b-button>
             </template>
@@ -73,6 +73,21 @@
         </div>
       </div>
     </b-container>
+    <b-modal id="delact" hide-footer centered>
+      <b-container class="text-center">
+        <p> <b>Are you sure to delete the following messages ?</b> </p>
+        <h5 class="text-purple">演示内容 演示内容 演示内容</h5>
+        <div>
+          <b-button size="lg" class="pr-4 pl-4" variant="danger" pill>
+             Yes
+          </b-button>
+          <b-button class="ml-3" size="lg" variant="danger" pill>
+             Cancel
+          </b-button>
+        </div>
+      </b-container>
+
+    </b-modal>
 
    
   </div>

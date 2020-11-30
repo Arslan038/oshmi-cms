@@ -41,6 +41,7 @@ export default {
       margin-top:1rem !important;
   }
 }
+
 .border-hids{
   border-left:none !important;
   border-right:none !important; 
@@ -48,6 +49,9 @@ export default {
 }
 .text-main{
   color:#1c4694 !important;
+}
+.mt-10{
+  margin-top:10px;
 }
 .mt--50{
   margin-top:-50px;
@@ -103,6 +107,11 @@ td {
 #nav a.router-link-exact-active {
   color: #42b983;
 }
+.btn-outline-secondary:hover{
+  color:white !important;
+  background:#a37be5 !important;
+  border-color:#a37be5 !important;
+}
 .btn-danger{
   background:#a37be5 !important;
   border-color:#a37be5 !important;
@@ -116,7 +125,7 @@ td {
   border-color:#7ed321 !important;
 }
 .btn-outline-success{
-  color: #fff;
+  color: #7ed321 !important;
   background-color: white !important;
   border-color: #7ed321 !important;
 }

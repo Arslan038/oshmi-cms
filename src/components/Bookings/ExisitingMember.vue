@@ -10,8 +10,8 @@
         </div>
 
         <div>
-            <div>
-                <b-table :responsive="true" :fields="student_head" :items="student_data">
+            <div class="mt-3">
+                <b-table bordered :responsive="true" :fields="student_head" :items="student_data">
                     <template v-slot:head(member_id)="data">
                         <span class="smalls">{{ data.label }}</span>
                     </template>

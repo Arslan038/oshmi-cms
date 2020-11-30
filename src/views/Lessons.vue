@@ -22,7 +22,7 @@
             </div>
 
             <div class="mt-3">
-                <b-table :responsive="true" striped hover :fields="fields" :items="view_able_orders">
+                <b-table bordered :responsive="true" striped hover :fields="fields" :items="view_able_orders">
                     <template v-slot:head(course_title)="data">
                         <span class="smalls">Course Title</span>
                     </template>

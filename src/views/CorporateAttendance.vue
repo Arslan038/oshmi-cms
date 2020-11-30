@@ -19,8 +19,10 @@
               <option value="" selected disabled>--Select Corporate--</option>
             </select>
           </div>
-          <div class="mt-3">
-            <select class="form-control rounded" style="color:black !important" >
+          <div class="mt-3 d-flex">
+            <b-form-radio  name="some-radios" class="al-center" value="A"></b-form-radio>
+
+            <select class="form-control rounded " style="color:black !important" >
               <option value="" selected disabled>Select Month</option>
               <option value="January-2020">January-2020</option>
               <option value="February-2020">February-2020</option>
@@ -29,7 +31,9 @@
 
             </select>
           </div>
-          <div class="mt-3">
+          <div class="mt-3 d-flex">
+            <b-form-radio v-model="selected" name="some-radios" value="B"></b-form-radio>
+
             <input type="date" class="form-control rounded">
             <!-- <select class="form-control rounded" >
               <option value="" selected disabled>Select Date</option>

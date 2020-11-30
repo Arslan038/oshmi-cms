@@ -7,11 +7,13 @@
 
        </b-col>
        <b-col>
-         <b-container class="  mt--50" >
+         <b-container class="mt-10" >
           <b-row>
             <b-col md="12" class="text-left text-white">
+               <h3 >Management System</h3> 
             </b-col>
             <b-col md="12" class="mt-3">
+                <img align="left" src="../assets/logos.png" alt="">
             </b-col>
             
           </b-row>
