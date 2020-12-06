@@ -29,7 +29,7 @@
         </b-row>
         <b-row class="mt-2">
           <b-col>
-              <b-button variant="danger" type="submit" pill class="pr-4 pl-4">Sign In</b-button>
+              <b-button variant="danger" type="submit" pill class="pr-4 pl-4" :disabled="loading">{{loading ? "Please wait..." : "Sign In"}}</b-button>
           </b-col>
         </b-row>
       </b-form>
@@ -38,21 +38,27 @@
 </template>
 
 <script>
-
+import {mapActions} from 'vuex'
 export default {
   name: 'SecondaryHeader',
     data() {
         return {
+          loading: false,
           login:{
-          email: '',
-          password:''
-        }
+            email: '',
+            password:''
+          }
       }
     },
     methods:{
+      ...mapActions(['loginRequest']),
       async loginUser() {
-        
-        //this.$router.push({path:'/dashboard'})
+        this.loading = true
+        const resp = await this.loginRequest(this.login)
+        this.loading = false
+        if(resp == 1) {
+          this.move('/dashboard')
+        }
       },
     }
 }

@@ -5,10 +5,18 @@
 </template>
 
 <script>
-import nativeToast from 'native-toast'
-
+import {mapGetters} from 'vuex'
 export default {
-  
+  computed: {
+    ...mapGetters(['getToast'])
+  },
+  watch: {
+    getToast(val) {
+      if(val.message) {
+        this.toast(val)
+      }
+    },
+  }
 }
 </script>
 

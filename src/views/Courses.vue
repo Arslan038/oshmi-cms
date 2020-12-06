@@ -22,7 +22,7 @@
 
             <div class="mt-3">
                 <b-table bordered :responsive="true" striped hover :fields="fields" :items="view_able_orders">
-                    <template v-slot:head(CourseTitle)="data">
+                    <template v-slot:head(CourseTitle)="">
                         <span class="smalls">Course Title</span>
                     </template>
                     <template v-slot:head(ClassSize)="">
@@ -65,7 +65,7 @@
                             <b-button variant="success"> {{ data.item.status }}</b-button>
                         </span>
                     </template>
-                    <template v-slot:cell(action)="data">
+                    <template v-slot:cell(action)="">
                         <i class="fas fa-copy text-primary"></i>
                         <router-link to="/edit-courses"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link>
                         <i v-b-modal.del-modal class="fas fa-trash text-danger"></i>

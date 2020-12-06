@@ -5,6 +5,6 @@ const login_request = 'admin/signin'
 export default {
     // Login User
     loginRequest(payload) {
-        return
+        return Repository.post(`${login_request}`, payload)
     }
 }

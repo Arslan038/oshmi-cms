@@ -77,6 +77,7 @@
 </template>
 
 <script>
+import {mapActions} from 'vuex'
 export default {
   name: 'Header',
   computed:{
@@ -102,7 +103,10 @@ export default {
     logOut(){
       this.$router.push('/')
       localStorage.removeItem("setroute")
-
+      localStorage.removeItem('oshmiToken')
+      localStorage.removeItem('oshmiAdmin')
+      this.toast({message: "Logged Out", title: "Logout", type: "success"})
+      this.move('/login')
     }
   }
 }

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
-import router from './router'
+import VueRouter from 'vue-router'
+import routes from './router'
 import BootstrapVue from 'bootstrap-vue'
 import VueApexCharts from 'vue-apexcharts'
 
@@ -17,7 +18,8 @@ import "fullcalendar/dist/fullcalendar.min.css";
 import { Upload,Icon   } from 'ant-design-vue';
 
 import JsonCSV from 'vue-json-csv'
- 
+import store from './store'
+
 
 Vue.component('downloadCsv', JsonCSV)
 Vue.config.productionTip = false
@@ -25,11 +27,34 @@ Vue.use(BootstrapVue)
 Vue.use(Upload);
 Vue.use(Icon);
 Vue.use(FullCalendar);
-
- 
 Vue.use(VueApexCharts)
 Vue.component('apexchart', VueApexCharts)
+Vue.use(VueRouter)
+
+import globalMixin from './mixins/global'
+Vue.mixin(globalMixin)
+
+const router = new VueRouter({
+  mode: 'history',
+  base: process.env.BASE_URL,
+  routes
+})
+
+router.beforeEach((to, from, next) => {
+  const requiresAuth = to.matched.some((x) => x.meta.requiresAuth);
+  const loggedUser = localStorage.getItem('oshmiAdmin')
+
+  if (requiresAuth && !loggedUser) {
+    next('/login');
+  }
+  else {
+    next();
+  }
+  
+});
+
 new Vue({
   router,
+  store,
   render: h => h(App)
 }).$mount('#app')

@@ -4,7 +4,11 @@ import axios from 'axios';
 const baseURL = "https://oshmi.herokuapp.com/";
 
 // Check If Token Exists
-const token = JSON.parse(localStorage.getItem("oshmi-token"))
+const isTokenExists = JSON.parse(localStorage.getItem("oshmiToken"))
+let token = null
+if(isTokenExists) {
+  token = isTokenExists.token
+}
     
 export default axios.create({
   baseURL,

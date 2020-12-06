@@ -1,5 +1,4 @@
 import Vue from 'vue'
-import VueRouter from 'vue-router'
 import Dashboard from '../views/Dashboard.vue'
 
 import Courses from '../views/Courses.vue'
@@ -25,9 +24,15 @@ import Messages from '../views/Messages.vue'
 import AddMessages from '../views/AddMessages.vue'
 
 
-Vue.use(VueRouter)
-
 const routes = [
+  {
+    path: '/',
+    name: 'Home',
+    component: Dashboard,
+    meta: {
+      requiresAuth: true,
+    }
+  },
   {
     path: '/dashboard',
     name: 'Dashboard',
@@ -212,16 +217,10 @@ const routes = [
     }
   },
   {
-    path: '/',
-    name: 'Login',
+    path: '/login',
+    name: 'login',
     component: Login
   },
 ]
 
-const router = new VueRouter({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
-})
-
-export default router
+export default routes
