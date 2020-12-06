@@ -52,6 +52,15 @@ const routes = [
       requiresAuth: true,
     }
   },
+
+  {
+    path: '/add-member',
+    name: 'MemberInfo',
+    component: MemberInfo,
+    meta: {
+      requiresAuth: true,
+    }
+  },
   
   {
     path: '/news-blog',

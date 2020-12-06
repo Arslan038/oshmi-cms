@@ -6,7 +6,7 @@
       <MembersHeader
         :create="true"
         addtext="Add"
-        reroute="/create-courses"
+        reroute="/add-member"
       />
       <div class="mt-4 text-left text-primary">
         <h4 class="text-purple">Members</h4>
@@ -69,7 +69,7 @@
             <template v-slot:cell(license_expiry_date)="data">
                 <span class="smalls">{{data.item.license_expiry_date}} </span>
             </template>
-            <template v-slot:cell(action)="data">
+            <template v-slot:cell(action)="">
                <router-link to="/member-info"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link> 
             </template>
         </b-table>
