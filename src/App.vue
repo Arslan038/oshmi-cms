@@ -181,4 +181,14 @@ td {
 .roundeds{
  border-radius: 1.25rem !important
 }
+
+.pick-product-image {
+    border-radius: 4px;
+    height: 100px;
+    padding-top: 15px;
+    border: 2px dotted #d3d3d3;
+}
+.pick-product-image:hover {
+  cursor: pointer;
+}
 </style>

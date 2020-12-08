@@ -12,5 +12,5 @@ if(isTokenExists) {
     
 export default axios.create({
   baseURL,
-  headers: {'Content-Type' : 'application/json' , 'Authorization': `Bearer ${ token ? token:'' }`}
+  headers: {'Content-Type' : 'multipart/form-data' , 'Authorization': `Bearer ${ token ? token:'' }`}
 });

@@ -2,6 +2,8 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import User from './modules/User'
 import Course from './modules/Course'
+import Categories from './modules/Categories'
+import Tutor from './modules/Tutor'
 
 Vue.use(Vuex)
 
@@ -17,6 +19,8 @@ export default new Vuex.Store({
   },
   modules: {
     User,
-    Course
+    Course,
+    Categories,
+    Tutor
   }
 })

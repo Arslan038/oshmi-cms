@@ -19,5 +19,15 @@ export default {
                 this.$router.push({path: to})
             }
         },
+        getLicenses() {
+            return [
+                'License A',
+                'License B',
+                'License C',
+                'License D',
+                'License E',
+                'License F'
+            ]
+        }
     }
 }
