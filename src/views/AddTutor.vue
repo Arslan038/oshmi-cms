@@ -177,7 +177,7 @@ export default {
             if(tutorData.files && tutorData.files.length) {
                 for( var i = 0; i < tutorData.files.length; i++ ){
                     let file = tutorData.files[i];
-                    form_data.append('files[' + i + ']', file);
+                    form_data.append('files', file);
                 }
             }
             form_data.forEach((value,key) => {
