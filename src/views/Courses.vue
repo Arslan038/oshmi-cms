@@ -1,74 +1,65 @@
 <template>
     <div class="home">
         <Header msg="Welcome to Your Vue.js App"/>
-        <SecondaryHeader msg="Welcome to Your Vue.js App" />
+        <SecondaryHeader title="Courses" :breadcrumb="breadcrumb" />
         <b-container class="card bg-white mt-2 pb-5 pt-2">
-            <CoursesHeader :create="true" addtext="Create course" reroute="/create-courses" />
+            <CoursesHeader :create="true" addtext="Create course" reroute="/create-course" />
             <div class="mt-4 text-left text-primary">
-                <h4 class="text-purple">My Course</h4>
+                <h4 class="text-purple">My Courses</h4>
             </div>
 
-            <div class="mt-2 text-md-left d-flex">
+            <b-row v-if="loading">
+                <b-col cols="12" class="text-center">
+                    <b-spinner variant="purple"></b-spinner>
+                    <p>Loading Courses</p>
+                </b-col>
+            </b-row>
+
+            <b-row v-if="!loading && !courses.length">
+                <b-col cols="12" class="text-center">
+                    <h5 class="text-purple">No Course Found</h5>
+                </b-col>
+            </b-row>
+
+            <div class="mt-2 text-md-left d-flex" v-if="!loading && courses.length">
                 <div class="self-center">
                     Search
                 </div>
                 <div class="ml-3">
-                    <input class="border-hids form-control col-md-12" />
+                    <input class="border-hids form-control col-md-12" type="search" v-model="filter" />
                 </div>
                 <div class="ml-auto">
-                    <b-button variant="info" class="pr-3 pl-3" pill @click="$bvModal.show('add-period-modal')">Export</b-button>
+                    <b-button variant="info" class="pr-3 pl-3" pill>Export</b-button>
                 </div>
             </div>
 
             <div class="mt-3">
-                <b-table bordered :responsive="true" striped hover :fields="fields" :items="view_able_orders">
-                    <template v-slot:head(CourseTitle)="">
-                        <span class="smalls">Course Title</span>
-                    </template>
-                    <template v-slot:head(ClassSize)="">
-                        <span class="smalls">Class Size</span>
-                    </template>
-                    <template v-slot:head(Price)="">
-                        <span class="smalls">Price</span>
-                    </template>
-                    <template v-slot:head(Periods)="">
-                        <span class="smalls">Periods</span>
-                    </template>
-
-                    <template v-slot:head(Status)="">
-                        <span class="smalls">Status</span>
-                    </template>
-
-                    <template v-slot:head(Action)="data">
-                        <span class="smalls">{{ data.label }}</span>
-                    </template>
-
+                <b-table v-if="!loading && courses.length" bordered :responsive="true" striped hover :fields="fields" :filter="filter" :items="courseList">
                     <!-- Cells -->
-                    <template v-slot:cell(coursetitle)="data">
-                        <span class="smalls">{{data.item.coursetitle}} </span>
-                    </template>
-                    <template v-slot:cell(classsize)="data">
-                        <span class="smalls">{{data.item.classsize}}</span>
-                    </template>
-                    <template v-slot:cell(price)="data">
-                        <span class="smalls">{{data.item.price}}</span>
-                    </template>
-                    <template v-slot:cell(location)="data">
-                        <span class="smalls">{{data.item.location}}</span>
-                    </template>
                     <template v-slot:cell(periods)="data">
-                        <span class="smalls">{{data.item.periods}} <i v-b-modal.add-period-modal class="fas fa-plus-circle"></i></span>
+                        <span class="text-primary link" @click="viewLessons(data.item)">View Lessons</span>
+                        <!-- <b-row>
+                            <b-col cols="10">
+                                <div v-if="data.item.Lessons.length">
+                                    <span v-for="(lesson, index) in data.item.Periods" :key="index"></span>
+                                </div>
+                            </b-col>
+                            <b-col cols="2" align-self="center">
+                                <i v-b-modal.add-period-modal class="fas fa-plus-circle"></i>
+                            </b-col>
+                        </b-row> -->
                     </template>
 
                     <template v-slot:cell(status)="data">
-                        <span class="smalls">
+                        <b-button size="sm" :variant="data.item.active ? 'success' : 'danger'"> {{ data.item.active ? 'Active' : 'Inactive' }}</b-button>
+                        <!-- <span class="smalls">
                             <b-button variant="success"> {{ data.item.status }}</b-button>
-                        </span>
+                        </span> -->
                     </template>
-                    <template v-slot:cell(action)="">
+                    <template v-slot:cell(actions)="data">
                         <i class="fas fa-copy text-primary"></i>
-                        <router-link to="/edit-courses"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link>
-                        <i v-b-modal.del-modal class="fas fa-trash text-danger"></i>
+                        <i @click="$router.push('/edit-course/'+data.item.id)" class="ml-2 mr-2 text-info fas fa-pencil-alt"></i>
+                        <i @click="removeCourse(data.item)" class="fas fa-trash text-danger"></i>
                     </template>
                 </b-table>
 
@@ -77,28 +68,61 @@
                 </div>
             </div>
         </b-container>
-        <b-modal id="add-period-modal" hide-footer size="xl">
+        <b-modal v-model="lessonModal" title="Course Lessons" hide-footer size="xl" scrollable>
             <b-container>
-                <b-table bordered responsive :items="new_items" :fields="create_course_heads">
-                    <template v-slot:head(start_date)="data">
-                        <span class="smalls">Start Date</span>
-                    </template>
-                    <template v-slot:head(end_Date)="">
-                        <span class="smalls">End Date</span>
-                    </template>
-                    <template v-slot:head(start_time)="">
-                        <span class="smalls">Start Time</span>
-                    </template>
-                    <template v-slot:head(end_time)="">
-                        <span class="smalls">End Time</span>
-                    </template>
-                    <template v-slot:head(action)="">
-                        <span class="smalls">Action</span>
-                    </template>
+                <b-row v-if="lessonsLoading">
+                    <b-col cols="12" class="text-center">
+                        <b-spinner variant="purple"></b-spinner>
+                        <p>Loading Course Lessons...</p>
+                    </b-col>
+                </b-row>
+                <b-row v-if="!lessonsLoading && !courseLessons.length && course">
+                    <b-col cols="12" class="text-center">
+                        <p>No Lesson Found for course <strong class="text-purple">{{course.name}}</strong></p>
+                    </b-col>
+                </b-row>
+                <b-table-simple v-if="courseLessons.length && !lessonsLoading" striped bordered>
+                    <b-thead>
+                        <b-th>Name</b-th>
+                        <b-th>Start Date</b-th>
+                        <b-th>End Date</b-th>
+                        <b-th>Start Time</b-th>
+                        <b-th>End Time</b-th>
+                        <b-th>Action</b-th>
+                    </b-thead>
+                    <b-tbody>
+                        <b-tr v-for="(lesson, index) in sortedLessons" :key="index">
+                            <b-td>
+                                {{lesson.name}}
+                            </b-td>
+                            <b-td>
+                                {{getDate(lesson.startDate)}}
+                                <!-- <b-form-datepicker  v-model="lesson.startDate" locale="en"></b-form-datepicker> -->
+                            </b-td>
+                            <b-td>
+                                {{getDate(lesson.endDate)}}
+                                <!-- <b-form-datepicker  v-model="lesson.endDate"></b-form-datepicker> -->
+                            </b-td>
+                            <b-td>
+                                {{lesson.startTime}}
+                                <!-- <b-form-timepicker v-model="lesson.startTime" locale="en"></b-form-timepicker> -->
+                            </b-td>
+                            <b-td>
+                                {{lesson.endTime}}
+                                <!-- <b-form-timepicker v-model="lesson.endTime" locale="en"></b-form-timepicker> -->
+                            </b-td>
+                            <b-td>
+                                <i @click="removeLesson(lesson)" class="fa fa-trash link text-danger"></i>
+                            </b-td>
+                        </b-tr>
+                    </b-tbody>
+                </b-table-simple>
+                <!-- <b-table bordered responsive :items="course.Lessons" :fields="lessonFields">
+
                     <template v-slot:cell(start_date)="data">
                         <div>
                             <b-input-group>
-                                <b-form-input type="date"></b-form-input>
+                                <b-form-input v-model="" type="date"></b-form-input>
                             </b-input-group>
                         </div>
 
@@ -138,30 +162,102 @@
                     <template v-slot:cell(action)="data">
                         <i class="text-danger fas fa-trash"></i>
                     </template>
-                </b-table>
+                </b-table> -->
 
-                <b-button variant="outline-secondary"><i class="fas fa-plus-circle"></i> Add Period</b-button>
-                <div class="text-center">
-                    <b-button pill size="lg">Save</b-button>
-                    <b-button pill size="lg" class="ml-md-2">Cancel</b-button>
-                </div>
+                <b-button variant="outline-secondary" @click="addLesson"><i class="fas fa-plus-circle"></i> Add Lesson</b-button>
             </b-container>
         </b-modal>
-        <b-modal id="del-modal"   hide-footer centered>
-            <b-container class="text-center">
-                <p> <b>Are you sure to delete the following course ?</b> </p>
-                <h5 class="text-purple">演示内容 演示内容 演示内容</h5>
+
+        <!-- Lesson Modal -->
+
+        <!-- <b-model title="Course Lessons" v-model="lessonModal" hide-footer>
+            <b-table v-if="course.Lessons.length" bordered :responsive="true" :fields="lessonFields" :items="course.Lessons"></b-table>
+        </b-model> -->
+        
+        <!-- Delete Modal -->
+
+        <b-modal title="Delete Course" v-model="deleteModal" hide-footer centered>
+            <b-container class="text-center" v-if="courseToDelete">
+                <p> <b>Are you sure you want to delete Course "<strong class="text-purple">{{courseToDelete.name}}</strong>" ?</b> </p>
                 <div>
-                <b-button size="lg" variant="danger" pill>
-                    Yes
+                <b-button variant="danger" pill @click="removeCourseNow" :disabled="deleteLoading">
+                    {{deleteLoading ? 'Deleting Course...' : 'Yes'}}
                 </b-button>
-                <b-button class="ml-3" size="lg" variant="danger" pill>
+                <b-button class="ml-3" variant="outline-danger" @click="deleteModal = !deleteModal" pill>
                     Cancel
                 </b-button>
                 </div>
             </b-container>
+        </b-modal>
 
-            </b-modal>
+        <!-- Delete Lesson Modal -->
+
+        <b-modal title="Delete Lesson" v-model="deleteLessonModal" hide-footer hide-header-close no-close-on-backdrop centered>
+            <b-container class="text-center" v-if="lessonToDelete">
+                <p> <b>Are you sure you want to delete Lesson <strong class="text-purple">{{lessonToDelete.name}}</strong> from "<strong class="text-purple">{{lessonToDelete.courseTitle}}</strong>" ?</b> </p>
+                <div>
+                <b-button variant="danger" pill @click="removeLessonNow" :disabled="deleteLessonLoading">
+                    {{deleteLessonLoading ? 'Deleting Lesson...' : 'Yes'}}
+                </b-button>
+                <b-button class="ml-3" variant="outline-danger" :disabled="deleteLessonLoading" @click="hideDeleteLessonModal" pill>
+                    Cancel
+                </b-button>
+                </div>
+            </b-container>
+        </b-modal>
+
+        <!-- Add New Lesson Modal -->
+
+        <b-modal title="Add Lesson" v-model="addLessonModal" hide-footer hide-header-close no-close-on-backdrop centered>
+            <b-form @submit.prevent="submitLesson">
+                <b-row>
+                    <b-col cols="12">
+                        <b-form-group>
+                            <label for="lesson_name">Name*</label>
+                            <b-form-input placeholder="Lesson Name" class="rounded" v-model="newLesson.name" required></b-form-input>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12">
+                        <b-form-group>
+                            <label for="lesson_tutors">Select Tutors*</label>
+                            <multiselect v-model="newLesson.tutors" :options="getTutors" :tagabled="true" :multiple="true" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Tutors" tag-placeholder="Select Tutors" label="name" track-by="name" :preselect-first="false"></multiselect>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" lg="6">
+                        <b-form-group>
+                            <label for="lesson_start_date">Start Date*</label>
+                            <b-form-datepicker placeholder="Lesson Start Date" class="rounded" v-model="newLesson.startDate" :required="true"></b-form-datepicker>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" lg="6">
+                        <b-form-group>
+                            <label for="lesson_end_date">End Date*</label>
+                            <b-form-datepicker placeholder="Lesson End Date" class="rounded" v-model="newLesson.endDate" :required="true"></b-form-datepicker>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" lg="6">
+                        <b-form-group>
+                            <label for="lesson_start_time">Start Time*</label>
+                            <b-form-timepicker placeholder="Lesson Start Time" class="rounded" v-model="newLesson.startTime" :required="true"></b-form-timepicker>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" lg="6">
+                        <b-form-group>
+                            <label for="lesson_end_time">End Time*</label>
+                            <b-form-timepicker placeholder="Lesson End Time" class="rounded" v-model="newLesson.endTime" :required="true"></b-form-timepicker>
+                        </b-form-group>
+                    </b-col>
+                </b-row>
+                <b-row class="mt-3">
+                    <b-col cols="12" class="text-center">
+                        <b-button type="submit" variant="danger" pill :disabled="addLessonLoading">{{addLessonLoading ? 'Adding Lesson...' : 'Add Lesson'}}</b-button>
+                        <b-button @click="hideAddLessonModal" class="ml-3" variant="outline-danger" :disabled="addLessonLoading" pill>Cancel</b-button>
+                    </b-col>
+                </b-row>
+            </b-form>
+            
+        </b-modal>
+
 
     </div>
 </template>
@@ -170,82 +266,249 @@
 // @ is an alias to /src
 import Header from '@/components/Header.vue'
 import SecondaryHeader from '@/components/SecondaryHeader.vue'
-
 import CoursesHeader from '../components/CoursesHeader.vue'
+import {mapActions, mapGetters} from 'vuex'
+import Multiselect from 'vue-multiselect';
 export default {
-    name: 'Orders',
+    name: 'Courses',
     components: {
         Header,
         SecondaryHeader,
-        CoursesHeader
+        CoursesHeader,
+        Multiselect
+    },
+    computed: {
+        ...mapGetters(['getCourses', 'getTutors', 'getCourseLessons', 'getTutors']),
+        courseList() {
+            const items = this.courses
+            if(items) {
+                return items.slice(
+                    (this.currentPage - 1) * this.perPage,
+                    this.currentPage * this.perPage
+                )
+            }
+            return null
+        },
+
+        sortedLessons() {
+            const items = this.courseLessons
+            return items.sort((a,b) => a.endDate > b.endDate ? 1 : -1)
+        },
+    },
+    methods: {
+        ...mapActions(["fetchCourses", "fetchTutors", "deleteCourse", "fetchCourseLessons", "deleteLesson", "createLesson"]),
+        removeCourse(item) {
+            this.courseToDelete = Object.assign({}, item)
+            this.deleteModal = true
+        },
+        async removeCourseNow() {
+            this.deleteLoading = true
+            const resp = await this.deleteCourse(this.courseToDelete.id)
+            this.deleteLoading = false
+            if(resp == 1) {
+                this.deleteModal = false
+            }
+        },
+        async viewLessons(item) {
+            this.lessonModal = true
+            this.course = Object.assign({},item)
+            this.lessonsLoading = true
+            const resp = await this.fetchCourseLessons(item.id)
+            this.lessonsLoading = false
+            if(resp != 1) {
+                this.courseLessons = []
+            }
+        },
+        removeLesson(lesson) {
+            this.lessonToDelete = Object.assign({}, lesson)
+            this.lessonModal = false
+            this.deleteLessonModal = true
+        },
+        hideDeleteLessonModal() {
+            this.deleteLessonModal = false
+            this.lessonModal = true
+        },
+        async removeLessonNow() {
+            this.deleteLessonLoading = true
+            const resp = await this.deleteLesson(this.lessonToDelete.id)
+            this.deleteLessonLoading = false
+            if(resp == 1) {
+                this.deleteLessonModal = false
+                this.lessonModal = false
+            }
+        },
+        async addLesson() {
+            this.lessonModal = false
+            this.addLessonModal = true
+            if(!this.getTutors.length) {
+                await this.fetchTutors()
+            }
+        },
+        hideAddLessonModal() {
+            this.lessonModal = true
+            this.addLessonModal = false
+        },
+        async submitLesson() {
+            this.newLesson.courseId = this.course.id
+            const lessonData = Object.assign({}, this.newLesson)
+
+            if(!lessonData.tutors.length) {
+                this.toast({title: "Add Lesson", message: "Please Select atleast 1 Tutor", type: "warning"})
+                return
+            }
+            
+            // Set Array of Tutor ID
+            if(lessonData.tutors.length) {
+                let tutorsArray = []
+                lessonData.tutors.forEach(tutor => {
+                    tutorsArray.push(tutor.id)
+                })
+                lessonData.tutors = tutorsArray
+            }
+
+            if(!lessonData.startDate || !lessonData.endDate) {
+                this.toast({title: "Add Lesson", message:"Start and End Date Required.", type: "warning"})
+                return
+            }
+
+            if(!lessonData.startTime || !lessonData.endTime) {
+                this.toast({title: "Add Lesson", message:"Start and End TIme Required.", type: "warning"})
+                return
+            }
+            this.addLessonLoading = true
+            const resp = await this.createLesson(lessonData)
+            this.addLessonLoading = false
+
+            if(resp == 1) {
+                this.addLessonModal = false
+                this.lessonModal = false
+            }
+        }
+    },
+
+    async created() {
+        if(!this.getCourses.length) {
+            this.loading = true
+            const resp = await this.fetchCourses()
+            if(resp) {
+                this.loading = false
+            }
+        }
+        else {
+            this.courses = this.getCourses
+        }
+    },
+    watch: {
+        getCourses(val) {
+            if(val) {
+                this.courses = this.getCourses
+            }
+        },
+        getCourseLessons(val) {
+            if(val) {
+                this.courseLessons = val
+            }
+        }
     },
     data() {
         return {
-          new_items:[
-            {
-            start_date:'',
-            end_date:'',
-            start_time:'',
-            end_time:'',
-            action:''
+            filter: null,
+            totalRows: 1,
+            currentPage: 1,
+            perPage: 10,
+            loading: false,
+            lessonsLoading: false,
+            addLessonLoading: false,
+            deleteModal: false,
+            deleteLoading: false,
+            courseToDelete: null,
+            lessonToDelete: null,
+            deleteLessonModal: false,
+            deleteLessonLoading: false,
+            addLessonModal: false,
+            lessonModal: false,
+            course: null,
+            courseLessons: [],
+            courses: [],
+            newLesson: {
+                courseId: null,
+                tutors: [],
+                name: null,
+                startDate: null,
+                endDate: null,
+                startTime: null,
+                endTime: null
             },
-            {
-            start_date:'',
-            end_date:'',
-            start_time:'',
-            end_time:'',
-            action:''
-            }
-          ],
-          view_able_orders:[
-            {
-              coursetitle:'某人用中文写的东西作为演示文字',
-              classsize:'10',
-              price:'HKD$500',
-              location:'演示位置',
-              periods:'5-11-2020 - 20-11-2020',
-              status:'active',
-              action:''
-            },
-            {
-              coursetitle:'某人用中文写的东西作为演示文字',
-              classsize:'10',
-              price:'HKD$500',
-              location:'演示位置',
-              periods:'5-11-2020 - 20-11-2020',
-              status:'active',
-              action:''
-            }
-          ],
-         
-        
-        
-          create_course_heads: [
-          // A regular column
-          'start_date',
-          'end_Date',
-          'start_time',
-          'end_time',
-          'action'     
+            fields: [
+                {
+                    key: "name",
+                    label: "Course Title",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
+                {
+                    key: "availableSeats",
+                    label: "Class Size",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
+                {
+                    key: "price",
+                    label: "price",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
+                {
+                    key: "address",
+                    label: "Location",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
+                {
+                    key: "periods",
+                },
+                {
+                    key: 'status'
+                },
+                {
+                    key: 'actions'
+                }
+            ],
+            lessonFields: [
+                {
+                    key: "name",
+                    label: "Lesson Title",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
+                {
+                    key: "startDate",
+                    label: "Start Date"
+                },
+                {
+                    key: "endDate",
+                    label: "End Date"
+                },
+                {
+                    key: "startTime",
+                    label: "Start Time"
+                },
+                {
+                    key: "endTime",
+                    label: "End Time"
+                },
+                {
+                    label: "Action"
+                },
+            ],
 
-        ],
-        
-         fields: [
-          // A regular column
-          'CourseTitle',
-          'ClassSize',
-          'Price',
-          'Location',
-          'Periods',
-          'Status',
-          'Action',      
-
-        ],
-
-        totalRows: 1,
-        currentPage: 1,
-        perPage: 10,
-            
+            breadcrumb: [
+                {
+                    text: 'Courses',
+                    path: '/courses',
+                    active: true
+                }
+            ]
         }
     }
 }

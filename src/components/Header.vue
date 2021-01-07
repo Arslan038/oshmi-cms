@@ -101,7 +101,6 @@ export default {
       
     },
     logOut(){
-      this.$router.push('/')
       localStorage.removeItem("setroute")
       localStorage.removeItem('oshmiToken')
       localStorage.removeItem('oshmiAdmin')

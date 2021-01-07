@@ -1,7 +1,7 @@
 <template>
     <div class="home">
         <Header msg="Welcome to Your Vue.js App" />
-        <SecondaryHeader msg="Welcome to Your Vue.js App" />
+        <SecondaryHeader :breadcrumb="breadcrumb" title="Lessons" />
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="false" />
 
@@ -9,58 +9,55 @@
                 <h4 class="text-purple">Upcoming Lessons</h4>
             </div>
 
-            <div class="mt-2 text-md-left d-flex">
+            <b-row v-if="loading">
+                <b-col cols="12" class="text-center">
+                    <b-spinner variant="purple"></b-spinner>
+                    <p>Loading Lessons...</p>
+                </b-col>
+            </b-row>
+
+            <b-row v-if="!loading && !lessons.length">
+                <b-col cols="12" class="text-center">
+                    <h5 class="text-purple">No Lesson Found</h5>
+                </b-col>
+            </b-row>
+
+            <div class="mt-2 text-md-left d-flex" v-if="!loading && lessons.length">
                 <div class="self-center">
                     Search
                 </div>
                 <div class="ml-3">
-                    <input class="border-hids form-control col-md-12" />
+                    <input class="border-hids form-control col-md-12" type="search" v-model="filter" />
                 </div>
-                <div class="ml-auto">
-                    <b-button variant="info" @click="$router.push('/export-lessons')" class="pr-3 pl-3" pill>Export</b-button>
-                </div>
+                <!-- <div class="ml-auto">
+                    <b-button variant="info" @click="$router.push('/export-lesson/'+$route.params.id)" class="pr-3 pl-3" pill>Export</b-button>
+                </div> -->
             </div>
 
-            <div class="mt-3">
-                <b-table bordered :responsive="true" striped hover :fields="fields" :items="view_able_orders">
-                    <template v-slot:head(course_title)="data">
-                        <span class="smalls">Course Title</span>
-                    </template>
-                    <template v-slot:head(class_size)="">
-                        <span class="smalls">Class Size</span>
-                    </template>
-                    <template v-slot:head(location)="">
-                        <span class="smalls">Location</span>
-                    </template>
-                    <template v-slot:head(date)="">
-                        <span class="smalls">Date</span>
-                    </template>
-
-                    <template v-slot:head(start_time)="">
-                        <span class="smalls">Start Time</span>
-                    </template>
-
-                    <template v-slot:head(action)="data">
-                        <span class="smalls">{{ data.label }}</span>
-                    </template>
+            <div class="mt-3" v-if="!loading && lessons.length">
+                <b-table bordered :responsive="true" striped hover :fields="fields" :items="lessonList" :filter="filter">
 
                     <!-- Cells -->
-                    <template v-slot:cell(course_title)="data">
-                        <span class="smalls">{{data.item.course_title}} </span>
+                    <template v-slot:cell(courseTitle)="data">
+                        <span class="smalls">{{data.item.course.name}}</span>
                     </template>
-                    <template v-slot:cell(class_size)="data">
-                        <span class="smalls">{{data.item.class_size}}</span>
+                    <template v-slot:cell(classSize)="data">
+                        <span class="smalls">{{data.item.course.availableSeats}}</span>
                     </template>
-
-                    <template v-slot:cell(date)="data">
-                        <span class="smalls">{{data.item.date}}</span>
+                    <template v-slot:cell(location)="data">
+                        <span class="smalls">{{data.item.course.address}}</span>
                     </template>
-                    <template v-slot:cell(start_time)="data">
-                        <span class="smalls">{{data.item.start_time}} </span>
+                    <template v-slot:cell(startDate)="data">
+                        <span class="smalls">{{getDate(data.item.startDate)}}</span>
                     </template>
-
+                    <template v-slot:cell(endDate)="data">
+                        <span class="smalls">{{getDate(data.item.endDate)}}</span>
+                    </template>
+                    <template v-slot:cell(export)="data">
+                        <b-button variant="info" size="sm" @click="$router.push('/export-lesson/'+data.item.id)" class="pr-3 pl-3" pill>Export</b-button>
+                    </template>
                     <template v-slot:cell(action)="data">
-                        <router-link to="/edit-courses"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link>
+                        <i @click="editLesson(data.item)" class="ml-2 mr-2 text-info fas fa-pencil-alt link"></i>
                     </template>
                 </b-table>
 
@@ -69,90 +66,55 @@
                 </div>
             </div>
         </b-container>
-        <b-modal id="actions" hide-footer size="xl">
-            <b-container>
-                <b-table bordered :items="new_items" :fields="create_course_heads">
-                    <template v-slot:head(start_date)="data">
-                        <span class="smalls">Start Date</span>
-                    </template>
-                    <template v-slot:head(end_Date)="">
-                        <span class="smalls">End Date</span>
-                    </template>
-                    <template v-slot:head(start_time)="">
-                        <span class="smalls">Start Time</span>
-                    </template>
-                    <template v-slot:head(end_time)="">
-                        <span class="smalls">End Time</span>
-                    </template>
-                    <template v-slot:head(action)="">
-                        <span class="smalls">Action</span>
-                    </template>
-                    <template v-slot:cell(start_date)="data">
-                        <div>
-                            <b-input-group>
-                                <b-form-input type="date"></b-form-input>
-                            </b-input-group>
-                        </div>
 
-                        <div class="mt-2">
-                            <b-input-group>
-                                <select name="" id="" class="form-control">
-                                    <option selected disabled>- Select tutor -</option>
-                                </select>
-                            </b-input-group>
-                        </div>
-
-                        <div class="mt-1">
-                            <b-button pill variant="danger">Add tutor</b-button>
-                        </div>
-                    </template>
-                    <template v-slot:cell(end_date)="data">
-                        <b-input-group>
-                            <b-form-input type="date"></b-form-input>
-                        </b-input-group>
-                    </template>
-                    <template v-slot:cell(start_time)="data">
-                        <b-input-group>
-                            <b-form-input></b-form-input>
-                            <b-input-group-prepend>
-                                <b-button variant="light"><i class="far fa-clock"></i></b-button>
-                            </b-input-group-prepend>
-                        </b-input-group>
-                    </template>
-                    <template v-slot:cell(end_time)="data">
-                        <b-input-group>
-                            <b-form-input></b-form-input>
-                            <b-input-group-prepend>
-                                <b-button variant="light"><i class="far fa-clock"></i></b-button>
-                            </b-input-group-prepend>
-                        </b-input-group>
-                    </template>
-                    <template v-slot:cell(action)="data">
-                        <i class="text-danger fas fa-trash"></i>
-                    </template>
-                </b-table>
-
-                <b-button variant="outline-secondary"><i class="fas fa-plus-circle"></i> Add Period</b-button>
-            </b-container>
-        </b-modal>
-        <b-modal id="order-cancel" hide-header hide-footer>
-            <b-container>
-                <h5 class="text-primary pt-3">Confirm Cancel Order ?</h5>
-                <p class="text-muted">Upon cancellation , an email will be sent to the user to advice that order has been cancelled.</p>
-                <b-row class="mt-3 pt-4 pb-3">
-                    <b-col class="text-right">
-                        <b-button pill variant="primary" class="pr-4 pl-4" @click="cancelOrder('CANCELLED')"> Confirm</b-button>
-                    </b-col>
-                    <b-col class="text-main">
-                        <b-button pill variant="light" class="pr-4 pl-4" @click="$bvModal.hide('order-cancel')" style="border: 1px solid #dcdcdc;"> Cancel</b-button>
-                    </b-col>
-                </b-row>
-            </b-container>
-        </b-modal>
-        <b-modal id="order-confirm" hide-header hide-footer>
-            <b-container>
-                <h5 class="text-primary pt-3">Confirm Settlement?</h5>
-                <p class="text-muted">Upon confirmation , an email will be sent to the user to advice that payment has been received.</p>
+        <b-modal v-model="editModal" title="Edit Lesson" hide-footer>
+            <b-container v-if="lessonToEdit">
+                <b-form @submit.prevent="submitLesson">
+                    <b-row>
+                        <b-col cols="12">
+                            <b-form-group>
+                                <label for="lesson_name">Name*</label>
+                                <b-form-input placeholder="Lesson Name" class="rounded" v-model="lessonToEdit.name" required></b-form-input>
+                            </b-form-group>
+                        </b-col>
+                        <b-col cols="12">
+                            <b-form-group>
+                                <label for="lesson_tutors">Select Tutors*</label>
+                                <multiselect v-model="tutorList" :options="getTutors" :tagabled="true" :multiple="true" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Tutors" tag-placeholder="Select Tutors" label="name" track-by="name" :preselect-first="false"></multiselect>
+                            </b-form-group>
+                        </b-col>
+                        <b-col cols="12" lg="6">
+                            <b-form-group>
+                                <label for="lesson_start_date">Start Date*</label>
+                                <b-form-datepicker placeholder="Lesson Start Date" class="rounded" v-model="lessonToEdit.startDate" :required="true"></b-form-datepicker>
+                            </b-form-group>
+                        </b-col>
+                        <b-col cols="12" lg="6">
+                            <b-form-group>
+                                <label for="lesson_end_date">End Date*</label>
+                                <b-form-datepicker placeholder="Lesson End Date" class="rounded" v-model="lessonToEdit.endDate" :required="true"></b-form-datepicker>
+                            </b-form-group>
+                        </b-col>
+                        <b-col cols="12" lg="6">
+                            <b-form-group>
+                                <label for="lesson_start_time">Start Time*</label>
+                                <b-form-timepicker placeholder="Lesson Start Time" class="rounded" v-model="lessonToEdit.startTime" :required="true"></b-form-timepicker>
+                            </b-form-group>
+                        </b-col>
+                        <b-col cols="12" lg="6">
+                            <b-form-group>
+                                <label for="lesson_end_time">End Time*</label>
+                                <b-form-timepicker placeholder="Lesson End Time" class="rounded" v-model="lessonToEdit.endTime" :required="true"></b-form-timepicker>
+                            </b-form-group>
+                        </b-col>
+                    </b-row>
+                    <b-row class="mt-3">
+                        <b-col cols="12" class="text-center">
+                            <b-button type="submit" variant="danger" pill :disabled="editLoading">{{editLoading ? 'Updating Lesson...' : 'Edit Lesson'}}</b-button>
+                            <b-button @click="editModal = !editModal" class="ml-3" variant="outline-danger" :disabled="editLoading" pill>Cancel</b-button>
+                        </b-col>
+                    </b-row>
+                </b-form>
             </b-container>
         </b-modal>
     </div>
@@ -163,89 +125,172 @@
 import Header from '@/components/Header.vue'
 import SecondaryHeader from '@/components/SecondaryHeader.vue'
 import CoursesHeader from '../components/CoursesHeader.vue'
-
+import {mapActions, mapGetters} from 'vuex'
+import Multiselect from 'vue-multiselect';
 export default {
     name: 'Lessons',
     components: {
         Header,
         SecondaryHeader,
-        CoursesHeader
+        CoursesHeader,
+        Multiselect
+    },
+    computed: {
+        ...mapGetters(['getLessons', 'getTutors']),
+        lessonList() {
+            let items = this.lessons
+            if(items) {
+                items = items.sort((a,b) => a.endDate > b.endDate ? 1 : -1)
+                return items.slice(
+                    (this.currentPage - 1) * this.perPage,
+                    this.currentPage * this.perPage
+                )
+            }
+            return null
+        }
+    },
+    methods: {
+        ...mapActions(["fetchLessons", "fetchTutors", "updateLesson"]),
+        async editLesson(item) {
+            this.lessonToEdit = Object.assign({}, item)
+            console.log(this.lessonToEdit)
+            this.tutorList = []
+            await this.lessonToEdit.tutors.forEach(async t => {
+                let isTutor = await this.getTutors.find(tutor => tutor.id == t.id)
+                if(isTutor) {
+                    // this.tutorList.push(isTutor.LessonTutor.tutorId)
+                    // delete isTutor.LessonTutor
+                    this.tutorList.push(isTutor)
+                }
+            })
+            this.editModal = true
+        },
+
+        async submitLesson() {
+            let lessonData = Object.assign({}, this.lessonToEdit)
+            lessonData.courseId = lessonData.course.id
+            delete lessonData.course
+            if(!this.tutorList.length) {
+                this.toast({title: "Update Lesson", message: "Please Select atleast 1 Tutor", type: "warning"})
+                return
+            }
+            
+            // Set Array of Tutor ID
+            if(this.tutorList.length) {
+                let tutorsArray = []
+                this.tutorList.forEach(tutor => {
+                    tutorsArray.push(tutor.id)
+                })
+                lessonData.tutors = tutorsArray
+            }
+
+            if(!lessonData.startDate || !lessonData.endDate) {
+                this.toast({title: "Update Lesson", message:"Start and End Date Required.", type: "warning"})
+                return
+            }
+
+            if(!lessonData.startTime || !lessonData.endTime) {
+                this.toast({title: "Update Lesson", message:"Start and End TIme Required.", type: "warning"})
+                return
+            }
+            console.log(lessonData)
+            this.editLoading = true
+            const resp = await this.updateLesson(lessonData)
+            this.editLoading = false
+
+            if(resp == 1) {
+                this.editModal = false
+            }
+        }
+    },
+    async created() {
+        this.loading = true
+        await this.fetchLessons()
+        if(!this.getTutors.length) {
+            await this.fetchTutors()
+        }
+        this.loading = false
+    },
+    watch: {
+        getLessons(val) {
+            if(val && val.length) {
+                let lessonArray = []
+                val.forEach(item => {
+                    item.startDate = item.startDate.split('T')[0]
+                    item.endDate = item.startDate.split('T')[0]
+
+                    lessonArray.push(item)
+                })
+                this.lessons = lessonArray
+            }
+        },
+        getTutors(val) {
+            if(val) {
+                this.tutorList = val
+                
+            }
+        }
     },
     data() {
         return {
-          new_items:[
-            {
-            start_date:'',
-            end_date:'',
-            start_time:'',
-            end_time:'',
-            action:''
-            },
-            {
-            start_date:'',
-            end_date:'',
-            start_time:'',
-            end_time:'',
-            action:''
-            }
-          ],
-          view_able_orders:[
-            {
-              course_title:'某人用中文写的东西作为演示文字',
-              class_size:'10',
-              location:'演示位置',
-              date:'5-11-2020',
-              start_time:'12:15',
-              action:''
-            },
-           {
-              course_title:'某人用中文写的东西作为演示文字',
-              class_size:'10',
-              location:'演示位置',
-              date:'5-11-2020',
-              start_time:'12:15',
-              action:''
-            }
-          ],
-          confirm_settlement_obj:{
-            OrderId:'',
-            PaymentReference:'',
-            PaymentDate:'',
-            OrderKey:'',
-            UserKey:'',
-            Type:'INVOICE' 
-          },
-          excelFlag:false,
-          timers:'',
-          order_obj:{
-           Type: '',
-           OrderKey:'',
-           UserKey:'',
-          },
-          create_course_heads: [
-          // A regular column
-          'start_date',
-          'end_Date',
-          'start_time',
-          'end_time',
-          'action'     
-
-        ],
-         fields: [
-          // A regular column
-          'course_title',
-          'class_size',
-          'location',
-          'date',
-          'start_time',
-          'action',      
-
-        ],
-
-        totalRows: 1,
-        currentPage: 1,
-        perPage: 10,
-            
+            lessons: [],
+            tutorList: [],
+            loading: false,
+            filter: null,
+            lessonToEdit: null,
+            editLoading: false,
+            editModal: false,
+            fields: [
+                {
+                    key: "courseTitle",
+                    label: "Course Title",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
+                {
+                    key: "classSize",
+                    label: "Class Size",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
+                {
+                    key: "location",
+                    label: "Location"
+                },
+                {
+                    key: "startDate",
+                    label: "Start Date"
+                },
+                {
+                    key: "endDate",
+                    label: "End Date"
+                },
+                {
+                    key: "startTime",
+                    label: "Start Time"
+                },
+                {
+                    key: "endTime",
+                    label: "End Time"
+                },
+                {
+                    key: "export",
+                    label: "Export"
+                },
+                {
+                    key: "action",
+                    label: "Action"
+                },
+            ],
+            currentPage: 1,
+            perPage: 10,
+            totalRows: 1,
+            breadcrumb: [
+                {
+                    text: 'Lessons',
+                    active: true
+                },
+            ]
         }
     }
 }

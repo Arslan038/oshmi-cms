@@ -12,17 +12,20 @@ import AddBooking from '../views/AddBooking.vue'
 import Categories from '../views/Categories.vue'
 import Tutors from '../views/Tutors.vue'
 import AddTutor from '../views/AddTutor.vue'
+import EditTutor from '../views/EditTutor.vue'
 import Members from '../views/Members.vue'
 import MemberInfo from '../views/MemberInfo.vue'
 import CorporateMembers from '../views/CorporateMembers.vue'
 import AddCorporate from '../views/AddCorporate.vue'
+import EditCorporate from '../views/EditCorporate.vue'
 import Attendance from '../views/Attendance.vue'
 import CorporateAttendance from '../views/CorporateAttendance.vue'
 import NewsBlog from '../views/NewsBlog.vue'
 import AddNews from '../views/AddNews.vue'
 import Messages from '../views/Messages.vue'
 import AddMessages from '../views/AddMessages.vue'
-
+import AddIndividualMember from '../views/AddIndividualMember.vue'
+import EditIndividualMember from '../views/EditIndividualMember.vue'
 
 const routes = [
   {
@@ -59,9 +62,18 @@ const routes = [
   },
 
   {
-    path: '/add-member',
-    name: 'MemberInfo',
-    component: MemberInfo,
+    path: '/add-individual-member',
+    name: 'AddIndividualMember',
+    component: AddIndividualMember,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+
+  {
+    path: '/edit-individual-member/:id',
+    name: 'EditIndividualMember',
+    component: EditIndividualMember,
     meta: {
       requiresAuth: true,
     }
@@ -133,6 +145,14 @@ const routes = [
     }
   },
   {
+    path: '/edit-corporate/:id',
+    name: 'EditCorporate',
+    component: EditCorporate,
+    meta: {
+      requiresAuth: true,
+    }
+  },
+  {
     path: '/tutors',
     name: 'Tutors',
     component: Tutors,
@@ -148,7 +168,14 @@ const routes = [
       requiresAuth: true,
     }
   },
-  
+  {
+    path: '/edit-tutor/:id',
+    name: 'EditTutor',
+    component: EditTutor,
+    meta: {
+      requiresAuth: true,
+    }
+  },
   {
     path: '/categories',
     name: 'Categories',
@@ -158,7 +185,7 @@ const routes = [
     }
   },
   {
-    path: '/edit-courses',
+    path: '/edit-course/:id',
     name: 'EditCourses',
     component: EditCourses,
     meta: {
@@ -175,7 +202,7 @@ const routes = [
     }
   },
   {
-    path: '/create-courses',
+    path: '/create-course',
     name: 'CreateCourses',
     component: CreateCourses,
     meta: {
@@ -208,7 +235,7 @@ const routes = [
     }
   },
   {
-    path: '/export-lessons',
+    path: '/export-lesson/:id',
     name: 'ExportLessons',
     component: ExportLessons,
     props:true,

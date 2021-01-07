@@ -191,4 +191,13 @@ td {
 .pick-product-image:hover {
   cursor: pointer;
 }
+
+.multiselect__tags {
+    border-radius: 20px !important;
+    border: 1px solid #ced4da !important;
+}
+
+.link:hover {
+  cursor: pointer;
+}
 </style>

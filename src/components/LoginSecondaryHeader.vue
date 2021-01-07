@@ -57,7 +57,8 @@ export default {
         const resp = await this.loginRequest(this.login)
         this.loading = false
         if(resp == 1) {
-          this.move('/dashboard')
+          window.location.href = window.location.href.split('login')[0]+'dashboard'
+          //this.move('/dashboard')
         }
       },
     }

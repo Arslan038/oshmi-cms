@@ -1,7 +1,7 @@
 <template>
     <div class="home">
         <Header msg="Welcome to Your Vue.js App" />
-        <SecondaryHeader msg="Welcome to Your Vue.js App" />
+        <SecondaryHeader title="Export Lesson" :breadcrumb="breadcrumb"/>
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <b-row class="mt-4">
                 <b-col md="4" class="text-left">
@@ -88,39 +88,63 @@
 // @ is an alias to /src
 import Header from '@/components/Header.vue'
 import SecondaryHeader from '@/components/SecondaryHeader.vue'
-
-
+import {mapActions, mapGetters} from 'vuex'
 export default {
     name: 'ExportLesson',
+    computed: {
+        ...mapGetters(['getBookings'])
+    },
     components: {
         Header,
         SecondaryHeader
     },
+
+    async created() {
+        if(!this.getBookings.length) {
+            this.loading = true
+            await this.fetchBookings()
+            this.loading = false
+        }
+    },
+    watch: {
+        getBookings(val) {
+            if(val) {
+            }
+        }
+    },
+    methods: {
+        ...mapActions(["fetchBookings"])
+    },
     data() {
         return {
             fields: [
-            // A regular column
-            'student_name',
-            'student_id',
-            'arrival_time',
-            'signature',   
-
+                {
+                    key: "id",
+                    label: "No",
+                },
+                {
+                    key: "memberFirstName",
+                    label: "First Name"
+                },
+                {
+                    key: "memberLaststName",
+                    label: "Last Name"
+                }
             ],
             view_able_orders:[
-            {
-              student_name:'Chan',
-              student_id:'10',
-              arrival_time:'演示位置',
-              signature:'5-11-2020',
-              
-            },
-            {
-              student_name:'Chan',
-              student_id:'10',
-              arrival_time:'演示位置',
-              signature:'5-11-2020',
-            }
+           
           ],
+          breadcrumb: [
+                {
+                    text: 'Lessons',
+                    active: false,
+                    path: '/lessons'
+                },
+                {
+                    text: 'Export Lesson',
+                    active: true
+                }
+            ]
         }
     }
 }

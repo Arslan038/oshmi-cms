@@ -1,15 +1,22 @@
 <template>
     <div class="home">
         <Header msg="Welcome to Your Vue.js App" />
-        <SecondaryHeader title="Add Tutor" :breadcrumb="breadcrumb" />
-        <b-container class="card bg-white mt-2 pb-5 pt-2">
+        <SecondaryHeader title="Edit Tutor" :breadcrumb="breadcrumb" />
+        <b-container class="card bg-white mt-2 pb-5 pt-2" >
             <b-row>
                 <b-col class="mt-2 text-left text-primary">
-                    <h4 class="text-purple">Add Tutor</h4>
+                    <h4 class="text-purple">Update Tutor</h4>
                 </b-col>
             </b-row>
 
-            <b-form @submit.prevent="submitTutor">
+            <b-row v-if="loading">
+                <b-col cols="12">
+                    <b-spinner variant="purple"></b-spinner>
+                    <p>Loading Tutor Information...</p>
+                </b-col>
+            </b-row>
+
+            <b-form @submit.prevent="submitTutor" v-if="tutor && !loading">
                 <b-row class="mt-3">
                     <b-col md="2" class="text-left">
                         <b>Tutors Full Name</b>
@@ -71,7 +78,7 @@
                             <b-col cols="5">
                                 <b-form-group>
                                     <label for="expiry_date" v-if="tutor.licenses.length && index == 0"><strong>Expiry Date</strong></label>
-                                    <b-form-datepicker class="rounded" :min="today" v-model="license.expiry_date" required></b-form-datepicker>
+                                    <b-form-datepicker class="rounded" v-model="license.expiry_date" required></b-form-datepicker>
                                 </b-form-group>
                             </b-col>
                             <b-col cols="2" align-self="center">
@@ -86,23 +93,27 @@
                         <h6><b>File</b></h6>
                     </b-col>
                     <b-col md="8" cols="12" class="mb-3">
-                    <div @click="pickFile" class="text-center pick-product-image">
-                        <p>
-                        <i class="fa fa-upload fa-2x"></i>
-                        <br />
-                        </p>
-                        <strong>Click To Upload Files</strong>
-                        <input
-                            type="file"
-                            style="display:none"
-                            ref="fileUpload"
-                            @change="onUploadFile"
-                            multiple
-                        />
-                    </div>
-                    <div class="d-flex justify-content-between mt-2" v-for="(file, index) in tutor.files" :key="index">
+                        <div @click="pickFile" class="text-center pick-product-image">
+                            <p>
+                            <i class="fa fa-upload fa-2x"></i>
+                            <br />
+                            </p>
+                            <strong>Click To Upload Files</strong>
+                            <input
+                                type="file"
+                                style="display:none"
+                                ref="fileUpload"
+                                @change="onUploadFile"
+                                multiple
+                            />
+                        </div>
+                        <div class="d-flex justify-content-between mt-2" v-for="(file, index) in oldFiles" :key="file.id">
+                            <strong class="text-purple">{{file.name}}.{{file.extension}}</strong>
+                            <i @click="removeFile(file,index)" class="fa fa-times-circle"></i>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2" v-for="(file, index) in newUploads" :key="index">
                             <strong class="text-purple">{{file.name}}</strong>
-                            <i @click="removeFile(index)" class="fa fa-times-circle"></i>
+                            <i @click="removeUploadedFile(index)" class="fa fa-times-circle"></i>
                         </div>
                     </b-col>
                 </b-row>
@@ -110,7 +121,7 @@
                     <b-row class="mt-3">
                         <b-col class="text-md-left">
                             <div>
-                                <b-button variant="danger" class="px-5" type="submit" pill :disabled="loading">{{loading ? 'Adding Tutor...' : 'Add Tutor'}}</b-button>
+                                <b-button variant="danger" class="px-5" type="submit" pill :disabled="editLoading">{{editLoading ? 'Updating Tutor...' : 'Update Tutor'}}</b-button>
                             </div>
                             <div class="mt-3">
                                 <b-button variant="outline-danger" class="px-5" @click="$router.push('/tutors')" pill>Cancel</b-button>
@@ -127,18 +138,56 @@
 // @ is an alias to /src
 import Header from '@/components/Header.vue'
 import SecondaryHeader from '@/components/SecondaryHeader.vue'
-import {mapActions} from 'vuex'
+import {mapActions, mapGetters} from 'vuex'
 export default {
-    name: 'Orders',
+    name: 'EditTutor',
     components: {
         Header,
         SecondaryHeader,
+    },
+    computed: {
+        ...mapGetters(['getTutors', 'getTutor']),
+    },
+    async created() {
+        if(this.getTutors.length < 1) {
+            this.loading = true
+            const resp = await this.fetchTutor(this.$route.params.id)
+            this.loading = false
+            if(resp == 1) {
+                this.tutor = this.getTutor
+                this.setTutorData()
+            }
+        }
+        else {
+            const findTutor = this.getTutors.find(t => t.id == this.$route.params.id)
+            if(findTutor) {
+                this.tutor = findTutor
+                this.setTutorData()
+            }
+        }
     },
     watch:{
      
     },
     methods: {
-        ...mapActions(["createTutor"]),
+        ...mapActions(["updateTutor", 'fetchTutor']),
+        setTutorData() {
+            if(this.tutor.licenses) {
+                if(typeof this.tutor.licenses == "string") {
+                    const licenses = JSON.parse(this.tutor.licenses)
+                    if(this.tutor.licenses.length) {
+                        this.tutor.licenses = licenses
+                        this.have_licenses = true
+                    }
+                }
+                if(typeof this.tutor.licenses == "object") {
+                    this.have_licenses = true
+                }
+            }
+            // Set Course Files
+            this.oldFiles = this.tutor.TutorFiles
+            this.tutor.deleteFiles = []
+        },
         addLicense() {
             const pricing = {
                 name: null,
@@ -149,52 +198,69 @@ export default {
         removeTutor(index) {
             this.tutor.licenses.splice(index, 1);
         },
-        removeFile(index) {
-            this.tutor.files.splice(index, 1);
+        removeFile(file, index) {
+            this.oldFiles.splice(index, 1)
+            this.tutor.deleteFiles.push(file.id)
+        },
+        removeUploadedFile(index) {
+            this.newUploads.splice(index, 1);
         },
         pickFile() {
             this.$refs.fileUpload.click();
         },
         onUploadFile(e) {
             let all_files = e.target.files
-            let uploadedFiles = this.tutor.files
+            let uploadedFiles = this.newUploads
 
             for(let file = 0; file < all_files.length; file++) {
-                this.tutor.files.push(all_files[file])
+                this.newUploads.push(all_files[file])
             }
         },
         async submitTutor() {
             //console.log(this.tutor)
             let tutorData = Object.assign({}, this.tutor)
-            if(!this.have_licenses && tutorData.licenses.length) {
-                delete tutorData.licenses
+            if(this.tutor.licenses && this.tutor.licenses.length) {
+                tutorData.licenses = JSON.stringify(tutorData.licenses)
             }
-            if(tutorData.licenses && tutorData.licenses.length) {
-                if(tutorData.licenses.length == 1 && (tutorData.licenses[0].name == null || tutorData.licenses[0].name == "")) {
-                    delete tutorData.licenses
-                }
-                else {
-                    tutorData.licenses = JSON.stringify(tutorData.licenses)
-                }
-                
+
+            // Set Delete Files
+            if(tutorData.deleteFiles.length > 0) {
+                tutorData.deleteFiles = JSON.stringify(tutorData.deleteFiles)
             }
+            else {
+                delete tutorData.deleteFiles
+            }
+
             var form_data = new FormData();
             for ( var key in tutorData ) {
                 form_data.append(key, tutorData[key]);
             }
             form_data.delete("files")
-            if(tutorData.files && tutorData.files.length) {
-                for( var i = 0; i < tutorData.files.length; i++ ){
-                    let file = tutorData.files[i];
+            if(this.newUploads.length) {
+                for( var i = 0; i < this.newUploads.length; i++ ){
+                    let file = this.newUploads[i];
                     form_data.append('files', file);
                 }
             }
-            form_data.forEach((value,key) => {
-                console.log(key+" "+value)
-            });
-            this.loading = true
-            const resp = await this.createTutor(form_data)
-            this.loading = false
+            // if(this.newUploads && this.newUploads.length) {
+            //     tutorData.files = tutorData.files.concat(this.newUploads)
+            // }
+            // if(tutorData.files && tutorData.files.length) {
+            //     for( var i = 0; i < tutorData.files.length; i++ ){
+            //         let file = tutorData.files[i];
+            //         form_data.append('files', file);
+            //     }
+            // }
+            // form_data.forEach((value,key) => {
+            //     console.log(key+" "+value)
+            // });
+            const payload = {
+                id: this.tutor.id,
+                data: form_data
+            }
+            this.editLoading = true
+            const resp = await this.updateTutor(payload)
+            this.editLoading = false
 
             if(resp == 1) {
                 this.move('/tutors')
@@ -203,23 +269,12 @@ export default {
     },
     data() {
         return {
-            today: new Date(),
             loading: false,
-            have_licenses: true,
-            tutor: {
-                name: null,
-                email: null,
-                phone: null,
-                qualification: null,
-                payment: null,
-                licenses: [
-                    {
-                        name: null,
-                        expiry_date: null
-                    }
-                ],
-                files: []
-            },
+            editLoading: false,
+            have_licenses: false,
+            tutor: null,
+            oldFiles: [],
+            newUploads: [],
             breadcrumb: [
                 {
                     text: 'Tutors',
@@ -227,7 +282,7 @@ export default {
                     active: false
                 },
                 {
-                    text: 'Add Tutor',
+                    text: 'Edit Tutor',
                     active: true
                 }
             ]

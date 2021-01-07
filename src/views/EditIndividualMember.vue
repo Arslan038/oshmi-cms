@@ -1,15 +1,28 @@
 <template>
  <div class="home">
-    <b-container class="mt-2 pb-5 pt-2 mt-3">
-        <div class="mt-2 text-left text-primary mb-5">
-            <h4 class="text-purple">(New Member)</h4>
+    <Header msg="Welcome to Your Vue.js App" />
+    <SecondaryHeader title="Edit Individual Member" :breadcrumb="breadcrumb" />
+    <b-container class="card bg-white mt-2 pb-5 pt-2">
+        <div class="mt-2 text-left text-primary">
+            <h4 class="text-purple">Edit Member</h4>
         </div>
-        <b-form @submit.prevent="submitMember">
+        <b-row v-if="loading">
+            <b-col cols="12">
+                <b-spinner variant="purple"></b-spinner>
+                <p>Loading Member Details...</p>
+            </b-col>
+        </b-row>
+        <b-row v-if="!loading && !member">
+            <b-col cols="12">
+                <p>Member Not Found</p>
+            </b-col>
+        </b-row>
+        <b-form @submit.prevent="submitMember" v-if="!loading && member">
             <b-row class="mt-2">
                 <b-col md="3" class="text-left" cols="12">
                     <h6><b>First Name</b></h6>
                 </b-col>
-                <b-col md="9" cols="12">
+                <b-col md="7" cols="12">
                     <b-input placeholder="Tai Man" v-model="member.firstName" required class="roundeds"></b-input>
                 </b-col>
             </b-row>
@@ -17,7 +30,7 @@
                 <b-col md="3" class="text-left" cols="12">
                     <h6><b>Last Name</b></h6>
                 </b-col>
-                <b-col md="9" cols="12">
+                <b-col md="7" cols="12">
                     <b-input placeholder="Chan" v-model="member.lastName" required class="roundeds"></b-input>
                 </b-col>
             </b-row>
@@ -25,7 +38,7 @@
                 <b-col md="3" class="text-left" cols="12">
                     <h6><b>Mobile Phone No.</b></h6>
                 </b-col>
-                <b-col md="9" cols="12">
+                <b-col md="7" cols="12">
                     <b-input placeholder="Mobile Phone No." v-model="member.phone" required class="roundeds"></b-input>
                 </b-col>
             </b-row>
@@ -33,7 +46,7 @@
                 <b-col md="3" class="text-left" cols="12">
                     <h6><b>Email.</b></h6>
                 </b-col>
-                <b-col md="9" cols="12">
+                <b-col md="7" cols="12">
                     <b-input placeholder="email address" v-model="member.email" required class="roundeds"></b-input>
                 </b-col>
             </b-row>
@@ -41,7 +54,7 @@
                 <b-col md="3" class="text-left" cols="12">
                     <h6><b>ID Card No.</b></h6>
                 </b-col>
-                <b-col md="9" cols="12">
+                <b-col md="7" cols="12">
                     <b-input placeholder="e.g z813xxx(3)" v-model="member.idCard" required class="roundeds"></b-input>
                 </b-col>
             </b-row>
@@ -74,19 +87,70 @@
                 </b-col>
             </b-row>
             <div class="text-md-left mt-4">
-                <b-button pill variant="danger" class="d-block pr62" type="submit" :disabled="loading">{{loading ? 'Creating Member...' : 'Add'}}</b-button>
+                <b-button pill variant="danger" class="d-block pr62" type="submit" :disabled="editLoading">{{editLoading ? 'Updating Member...' : 'Update'}}</b-button>
+                <b-button pill variant="outline-secondary" @click="$router.push('/members')" :disabled="editLoading" class="d-block mt-md-2 mt-2 pr-5 pl-5">Cancel</b-button>
             </div>
         </b-form>
     </b-container>
+
+        
     </div>
 </template>
 
 <script>
+import Header from "@/components/Header.vue";
+import SecondaryHeader from "@/components/SecondaryHeader.vue";
+import MembersHeader from "../components/MembersHeader.vue";
 import {mapActions, mapGetters} from 'vuex'
 export default {
-  name: "NewMember",
+  name: "EditIndividualMember",
+  components: {
+    Header,
+    SecondaryHeader,
+    MembersHeader,
+  },
+  computed: {
+      ...mapGetters(['getIndividualMembers', 'getIndividualMember'])
+  },
+  async created() {
+    this.loading = true
+        if(!this.getIndividualMembers.length) {
+            await this.fetchIndividualMember(this.$route.params.id)
+        }
+        else {
+            const member = await this.getIndividualMembers.find(m => m.id == this.$route.params.id)
+            if(member) {
+                this.member = Object.assign({}, member)
+                if(!this.member.licenses) {
+                    this.member.licenses = []
+                    this.addLicense()
+                }
+                if(typeof this.member.licenses == 'string') {
+                    this.member.licenses = JSON.parse(this.member.licenses)
+                }
+                
+            }
+    }
+    this.loading = false
+  },
+
+  watch: {
+    getIndividualMember(val) {
+        if(val) {
+            this.member = Object.assign({},val)
+            if(!this.member.licenses) {
+                this.member.licenses = []
+                this.addLicense()
+            }
+            if(typeof this.member.licenses == 'string') {
+                this.member.licenses = JSON.parse(this.member.licenses)
+            }
+        }
+    }
+  },
+
   methods: {
-    ...mapActions(["createIndividualMember"]),
+    ...mapActions(["fetchIndividualMember", "updateIndividualMember"]),
     addLicense() {
         const license = {
             name: null,
@@ -105,15 +169,15 @@ export default {
         if(memberData.licenses && memberData.licenses.length) {
             let emptyLicense = memberData.licenses.filter(l => !l.name || !l.expiry)
             if(emptyLicense && emptyLicense.length) {
-                this.toast({title: "Create New Member", message: "License name and Expiry for all Licenses is Required.", type: "warning"})
+                this.toast({title: "Update Member", message: "License name and Expiry for all Licenses is Required.", type: "warning"})
                 return
             }
         }
-        this.loading = true
-        const resp = await this.createIndividualMember(memberData)
-        this.loading = false
+        this.editLoading = true
+        const resp = await this.updateIndividualMember(memberData)
+        this.editLoading = false
         if(resp == 1) {
-            this.$emit('memberAdded', 1)
+            this.$router.push('/members')
         }
     }
   },
@@ -121,19 +185,19 @@ export default {
     return {
         today: new Date(),
         loading: false,
-        member: {
-            firstName: null,
-            lastName: null,
-            email: null,
-            phone: null,
-            idCard: null,
-            licenses: [
-                {
-                    name: null,
-                    expiry: null
-                }
-            ]
-        }
+        editLoading: false,
+        member: null,
+        breadcrumb: [
+            {
+                text: 'Individual Members',
+                path: '/members',
+                active: false
+            },
+            {
+                text: 'Edit Individual Member',
+                active: true
+            }
+        ]
     }
   }
 }

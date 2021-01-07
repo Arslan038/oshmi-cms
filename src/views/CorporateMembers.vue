@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Header msg="Welcome to Your Vue.js App" />
-    <SecondaryHeader msg="Welcome to Your Vue.js App" />
+    <SecondaryHeader title="Corpotrate Members" :breadcrumb="breadcrumb"/>
     <b-container class="card bg-white mt-2 pb-5 pt-2">
       <MembersHeader
         :create="true"
@@ -9,15 +9,28 @@
         reroute="/add-corporate"
       />
       <div class="mt-4 text-left text-primary">
-        <h4 class="text-purple">Members</h4>
+        <h4 class="text-purple">Corporate Members</h4>
       </div>
 
-      <div class="mt-2 text-md-left d-flex">
+      <b-row v-if="loading">
+        <b-col cols="12" class="text-center">
+            <b-spinner variant="purple"></b-spinner>
+            <p>Loading Corporate Members...</p>
+        </b-col>
+      </b-row>
+
+      <b-row v-if="!loading && !members.length">
+        <b-col cols="12" class="text-center">
+            <h5 class="text-purple">No Corporate Member Found</h5>
+        </b-col>
+      </b-row>
+
+      <div class="mt-2 text-md-left d-flex" v-if="!loading && members.length">
         <div class="self-center">
           Search
         </div>
         <div class="ml-3">
-          <input class="border-hids form-control col-md-12" />
+          <input class="border-hids form-control col-md-12" type="search" v-model="filter" />
         </div>
         <div class="ml-auto">
           <b-button
@@ -30,55 +43,21 @@
         </div>
       </div>
 
-      <div class="mt-3">
-         <b-table :responsive="true" :fields="fields" :items="members_data">
+      <div class="mt-3" v-if="!loading && members.length">
+         <b-table :responsive="true" :fields="fields" bordered :items="memberList" :filter="filter">
            
-            <template v-slot:head(company_name)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(contact_email)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(contact_number)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(discount_rate)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
-            <template v-slot:head(end_date_of_discount)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
-            <template v-slot:head(action)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
             <!-- Cells -->
            
-            <template v-slot:cell(company_name)="data">
-                <span class="smalls">{{data.item.company_name}} </span>
+            <template v-slot:cell(discountValue)="data">
+                <span class="smalls">{{data.item.discountValue}} HKD</span>
             </template>
-            <template v-slot:cell(contact_email)="data">
-                <span class="smalls">{{data.item.contact_email}}</span>
-            </template>
-            <template v-slot:cell(contact_number)="data">
-                <span class="smalls">{{data.item.contact_number}}</span>
-            </template>
-            <template v-slot:cell(discount_rate)="data">
-                <span class="smalls">{{data.item.discount_rate}}</span>
-            </template>
-            <template v-slot:cell(group_specific_discount)="data">
-                <span class="smalls">{{data.item.group_specific_discount}} </span>
-            </template>
-            <template v-slot:cell(end_date_of_discount)="data">
-                <span class="smalls">{{data.item.end_date_of_discount}} </span>
+            <template v-slot:cell(discountEndDate)="data">
+                <span class="smalls">{{getDate(data.item.discountEndDate)}}</span>
             </template>
             
+            
             <template v-slot:cell(action)="data">
-               <router-link to="/member-info"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link> 
-              <span class="smalls" v-b-modal.del-modal><i class="fas fa-trash text-danger"></i></span>
-
+              <i @click="$router.push('/edit-corporate/'+data.item.id)" class="ml-2 mr-2 text-info fas fa-pencil-alt link"></i>
             </template>
         </b-table>
 
@@ -115,58 +94,109 @@
 // @ is an alias to /src
 import Header from "@/components/Header.vue";
 import SecondaryHeader from "@/components/SecondaryHeader.vue";
-
+import {mapActions, mapGetters} from 'vuex'
 import MembersHeader from "../components/MembersHeader.vue";
 export default {
-  name: "Orders",
+  name: "CorportaeMembers",
   components: {
     Header,
     SecondaryHeader,
     MembersHeader,
   },
+  computed: {
+    ...mapGetters(['getCorporateMembers']),
+    totalRows() {
+      return this.members.length
+    },
+    memberList() {
+      const items = this.members
+      if(items) {
+          return items.slice(
+              (this.currentPage - 1) * this.perPage,
+              this.currentPage * this.perPage
+          )
+      }
+      return null
+    }
+  },
+  async created() {
+    if(!this.getCorporateMembers.length) {
+      this.loading = true
+      const resp = await this.fetchCorporateMembers()
+      if(resp) {
+        this.loading = false
+      }
+    }
+    else {
+      this.members = this.getCorporateMembers
+    }
+  },
+  watch: {
+    getCorporateMembers(val) {
+      if(val && val.length) {
+        this.members = this.getCorporateMembers
+      }
+    }
+  },
+  methods: {
+    ...mapActions(["fetchCorporateMembers"])
+  },
   data() {
     return {
-      members_data: [
-
-        {
-            company_name:'Gammon Ltd',
-            contact_email:'demo@gmail.com',
-            contact_number:'852741852',
-            discount_rate:'-3000HKD',
-            group_specific_discount:'Group',
-            end_date_of_discount:'31-12-2020',
-            action:''
- 
-
-        },
-        {
-         
-            company_name:'Gammon Ltd',
-            contact_email:'demo@gmail.com',
-            contact_number:'852741852',
-            discount_rate:'-3000HKD',
-            group_specific_discount:'Group',
-            end_date_of_discount:'31-12-2020',
-            action:''
-
-        },
-      ],
-
-     
+      members: [],
+      loading: false,
+      filter: null,
       fields: [
-        // A regular column
-        "company_name",
-        "contact_email",
-        "contact_number",
-        "discount_rate",
-        "group_specific_discount",
-        "end_date_of_discount",
-        "action",
+        {
+          key: 'corporateName',
+          label: 'Company Name',
+          sortable: true,
+          sortByFormatted: true
+        },
+        {
+          key: 'email',
+          label: 'Contact Email',
+          sortable: true,
+          sortByFormatted: true
+        },
+        {
+          key: 'phone',
+          label: 'Contact Number',
+          sortable: true,
+          sortByFormatted: true
+        },
+        {
+          key: 'discountValue',
+          label: 'Discount Value',
+          sortable: true,
+          sortByFormatted: true
+        },
+        {
+          key: 'discountType',
+          label: 'Discount Type',
+          sortable: true,
+          sortByFormatted: true
+        },
+        {
+          key: 'discountEndDate',
+          label: 'Discount End Date',
+          sortable: true,
+          sortByFormatted: true
+        },
+        {
+          key: 'action',
+          label: 'Action'
+        }
       ],
-
-      totalRows: 1,
       currentPage: 1,
       perPage: 10,
+      breadcrumb: [
+          {
+              text: 'Corporate Members',
+              path: '/corporate-members',
+              active: true
+          }
+      ],
     };
   },
 };

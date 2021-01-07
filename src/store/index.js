@@ -4,6 +4,10 @@ import User from './modules/User'
 import Course from './modules/Course'
 import Categories from './modules/Categories'
 import Tutor from './modules/Tutor'
+import Lesson from './modules/Lesson'
+import Member from './modules/Member'
+import Corporate from './modules/Corporate'
+import Booking from './modules/Booking'
 
 Vue.use(Vuex)
 
@@ -21,6 +25,10 @@ export default new Vuex.Store({
     User,
     Course,
     Categories,
-    Tutor
+    Tutor,
+    Lesson,
+    Member,
+    Corporate,
+    Booking
   }
 })

@@ -19,6 +19,18 @@ export default {
                 this.$router.push({path: to})
             }
         },
+        getDate(date) {
+            let customDate = date.split('T')[0]
+            customDate = customDate.split('-')
+            var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            var getMonth = months[customDate[1] - 1]
+            var getDay = customDate[2];
+            var getYear = customDate[0];
+
+            var newDate = getMonth + " " + getDay + ", " + getYear
+
+            return newDate
+        },
         getLicenses() {
             return [
                 'License A',

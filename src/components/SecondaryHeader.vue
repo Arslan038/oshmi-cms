@@ -9,9 +9,7 @@
               <b-breadcrumb-item href="">
                 <span class="fa fa-home"></span>
               </b-breadcrumb-item>
-              <b-breadcrumb-item href="" >UI</b-breadcrumb-item>
-              <b-breadcrumb-item active>List Groups</b-breadcrumb-item>
-
+              <b-breadcrumb-item v-for="(item, index) in breadcrumb" :key="index" @click="item.path ? $router.push(item.path) : ''" :active="item.active">{{item.text}}</b-breadcrumb-item>
             </b-breadcrumb>
            </div>
          </b-col>
@@ -37,7 +35,10 @@
 export default {
   name: 'SecondaryHeader',
   
-  props:['title'],
+  props:{
+      title: String,
+      breadcrumb: Array
+  },
   data(){
     return {
       series: [{

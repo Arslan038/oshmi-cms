@@ -1,7 +1,7 @@
 <template>
     <div class="home">
         <Header msg="Welcome to Your Vue.js App" />
-        <SecondaryHeader msg="Welcome to Your Vue.js App" />
+        <SecondaryHeader :breadcrumb="breadcrumb" title="Categories"  />
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="false" addtext="Add Booking" reroute="/add-booking" />
             
@@ -23,14 +23,14 @@
                     Search
                 </div>
                 <div class="ml-3">
-                    <input class="border-hids form-control col-md-12" />
+                    <input class="border-hids form-control col-md-12" type="search" v-model="filter" />
                 </div>
             </div>
 
             <b-row class="mt-2" v-if="!loading && categories.length">
                 <b-col md="6" cols="12">
                     
-                    <b-table bordered :responsive="true" striped hover :fields="fields" :items="categories">
+                    <b-table bordered :responsive="true" striped hover :fields="fields" :items="categoryList" :filter="filter">
                         <template v-slot:head(name)>
                             <span class="smalls">Name</span>
                         </template>
@@ -46,14 +46,15 @@
                             <span class="smalls">{{data.item.name}} </span>
                         </template>
                         <template v-slot:cell(no_course)="data">
-                            <span class="smalls">{{data.item.categoryCourses ? data.item.categoryCourses.length : 0}}</span>
+                            <span class="smalls">{{countCourses(data.item.categoryCourses)}}</span>
                         </template>
                         <template v-slot:cell(action)="data">
+                            <span @click="editCategory(data.item)" class="mr-2 text-primary"><i class="fas fa-pencil-alt"></i></span>
                             <span @click="removeCategory(data.item)" class="smalls"><i class="fas fa-trash text-danger"></i></span>
                         </template>
                     </b-table>
                     <div class="float-right">
-                    <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" pills></b-pagination>
+                        <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" pills></b-pagination>
                     </div>
                 </b-col>
 
@@ -85,12 +86,31 @@
             </b-form>
         </b-modal>
 
+        <!-- Update Modal -->
+
+        <b-modal title="Update Category" v-model="editModal" hide-footer centered>
+            <b-form @submit.prevent="editCategoryNow" v-if="categoryToEdit">
+                <b-row>
+                    <b-col cols="12">
+                        <b-form-group>
+                            <label for="category_name">Category Name*</label>
+                            <b-form-input v-model="categoryToEdit.name" placeholder="Enter Category Name" required></b-form-input>
+                        </b-form-group>
+                        <b-button variant="danger" pill type="submit" :disabled="editLoading">{{editLoading ? 'Updating Category...' : 'Update Category'}}</b-button>
+                        <b-button variant="outline-danger" class="ml-2" pill @click="editModal = !editModal">Cancel</b-button>
+                    </b-col>
+                </b-row>
+            </b-form>
+        </b-modal>
+        
+        <!-- Delete Modal -->
+
         <b-modal title="Delete Category" v-model="deleteModal" hide-footer centered>
             <b-container class="text-center" v-if="categoryToDelete">
                 <p> <b>Are you sure you want to delete category "<strong class="text-purple">{{categoryToDelete.name}}</strong>" ?</b> </p>
                 <div>
-                <b-button variant="danger" pill>
-                    Yes
+                <b-button variant="danger" pill @click="removeCategoryNow" :disabled="deleteLoading">
+                    {{deleteLoading ? 'Deleting Category...' : 'Yes'}}
                 </b-button>
                 <b-button class="ml-3" variant="outline-danger" @click="deleteModal = !deleteModal" pill>
                     Cancel
@@ -110,7 +130,17 @@ import {mapActions, mapGetters} from 'vuex'
 export default {
     name: 'Categories',
     computed: {
-        ...mapGetters(['getCategories'])
+        ...mapGetters(['getCategories']),
+        categoryList() {
+            const items = this.categories
+            if(items) {
+                return items.slice(
+                    (this.currentPage - 1) * this.perPage,
+                    this.currentPage * this.perPage
+                )
+            }
+            return null
+        }
     },
     components: {
         Header,
@@ -118,7 +148,7 @@ export default {
         CoursesHeader
     },
     methods: {
-        ...mapActions(["createCategory", "fetchCategories"]),
+        ...mapActions(["createCategory", "fetchCategories", "deleteCategory", "updateCategory"]),
         async submitNewCategory() {
             this.createLoading = true
             const resp = await this.createCategory(this.category)
@@ -131,13 +161,44 @@ export default {
         removeCategory(item) {
             this.categoryToDelete = item
             this.deleteModal = true
+        },
+        async removeCategoryNow() {
+            this.deleteLoading = true
+            const resp = await this.deleteCategory(this.categoryToDelete.id)
+            this.deleteLoading = false
+            if(resp == 1) {
+                this.deleteModal = false
+            }
+        },
+        editCategory(item) {
+            this.categoryToEdit = Object.assign({}, item)
+            this.editModal = true
+        },
+        async editCategoryNow() {
+            this.editLoading = true
+            const resp = await this.updateCategory(this.categoryToEdit)
+            this.editLoading = false
+            if(resp == 1) {
+                this.editModal = false
+            }
+        },
+
+        countCourses(courses) {
+            if(!courses.length) {
+                return 0
+            }
+
+            const count = courses.filter(course => !course.isDeleted)
+            return count.length
         }
     },
     async created() {
         if(!this.getCategories.length) {
             this.loading = true
-            await this.fetchCategories()
-            this.loading = false
+            const resp = await this.fetchCategories()
+            if(resp) {
+                this.loading = false
+            }
         }
         else {
             this.categories = this.getCategories
@@ -145,8 +206,8 @@ export default {
     },
     watch: {
         getCategories(val) {
-            if(val) {
-                this.loading = false
+            if(val && val.length) {
+                
                 this.categories = this.getCategories
             }
         }
@@ -161,17 +222,26 @@ export default {
             categories: [],
             loading: false,
             createLoading: false,
+            editModal: false,
             categoryToDelete: null,
+            categoryToEdit: null,
             deleteLoading: false,
+            editLoading: false,
             fields: [
-            'name',
-            'no_course',
-            'action',
+                'name',
+                'no_course',
+                'action',
             ],
-
+            filter: null,
             totalRows: 1,
             currentPage: 1,
             perPage: 10,
+            breadcrumb: [
+                {
+                    text: 'Categories',
+                    active: true
+                }
+            ]
         }
     }
 }

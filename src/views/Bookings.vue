@@ -1,7 +1,7 @@
 <template>
     <div class="home">
         <Header msg="Welcome to Your Vue.js App" />
-        <SecondaryHeader msg="Welcome to Your Vue.js App" />
+        <SecondaryHeader title="Bookings" :breadcrumb="breadcrumb"/>
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="true" addtext="Add Booking" reroute="/add-booking" />
 
@@ -35,7 +35,7 @@
                     <template v-slot:head(invoice)="data">
                         <span class="smalls">{{data.label}}</span>
                     </template>
-                    <template v-slot:head(course_date)="data">
+                    <template v-slot:head(lesson_date)="data">
                         <span class="smalls">{{data.label}}</span>
                     </template>
 
@@ -115,7 +115,7 @@ export default {
               candidate_type:'Corporate',
               payment:'Monthly',
               invoice:'View',
-              course_date:'5-11-2020',
+              lesson_date:'5-11-2020',
               booking_date:'20-11-2020',
               booked_by:'Client',
               action:''
@@ -126,7 +126,7 @@ export default {
               candidate_type:'Corporate',
               payment:'Monthly',
               invoice:'View',
-              course_date:'5-11-2020',
+              lesson_date:'5-11-2020',
               booking_date:'20-11-2020',
               booked_by:'Client',
               action:''
@@ -140,7 +140,7 @@ export default {
           'candidate_type',
           'payment',
           'invoice',
-          'course_date',
+          'lesson_date',
           'booking_date',
           'booked_by',      
           'action'
@@ -149,6 +149,13 @@ export default {
         totalRows: 1,
         currentPage: 1,
         perPage: 10,
+
+        breadcrumb: [
+            {
+                text: 'Bookings',
+                active: true
+            }
+        ]
             
         }
     }

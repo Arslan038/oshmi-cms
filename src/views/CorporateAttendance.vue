@@ -9,17 +9,17 @@
       />
 
 
-      <b-row>
-        <b-col md="2 al-center">
-          <h6><b>Filter</b> </h6> 
+      <b-row class="mt-5">
+        <b-col md="2" cols="2" lg="2">
+          <h6 class="pt-2"><b>Corporate</b> </h6> 
         </b-col>
-        <b-col md="6">
+        <b-col cols="10" md="8" lg="6">
           <div>
             <select class="form-control rounded" >
               <option value="" selected disabled>--Select Corporate--</option>
             </select>
           </div>
-          <div class="mt-3 d-flex">
+          <!-- <div class="mt-3 d-flex">
             <b-form-radio  name="some-radios" class="al-center" value="A"></b-form-radio>
 
             <select class="form-control rounded " style="color:black !important" >
@@ -35,10 +35,14 @@
             <b-form-radio v-model="selected" name="some-radios" value="B"></b-form-radio>
 
             <input type="date" class="form-control rounded">
-            <!-- <select class="form-control rounded" >
-              <option value="" selected disabled>Select Date</option>
-            </select> -->
-          </div>
+          </div> -->
+        </b-col>
+      </b-row>
+      <b-row>
+        <b-col cols="2" md="2" lg="2">
+          <h6 class="pt-3"><b>Filter</b> </h6> 
+        </b-col>
+        <b-col cols="10" md="8" lg="6">
           <div class="mt-3">
             <select class="form-control rounded" >
               <option value="" selected disabled>--Status-</option>
