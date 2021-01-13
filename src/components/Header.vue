@@ -32,11 +32,11 @@
              <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 ml-md-2" @click="reRoute('/messages','Messages')">
                  <span :class="active_route=='Messages' ? 'text-purple': 'text-gray'">Messages</span> 
             </b-col>
-            <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 pr-md-0 ml-md-2 " @click="reRoute('/news-blog','News')"  >
+            <!-- <b-col  md="1" cols="12" style="cursor:pointer;" class="text-md-left pl-md-0 pr-md-0 ml-md-2 " @click="reRoute('/news-blog','News')"  >
                  <span :class="active_route=='News' ? 'text-purple': 'text-gray'">News</span> 
-            </b-col>
+            </b-col> -->
 
-            <b-col  md="5" cols="12" style="cursor:pointer;" class="text-md-right pl-md-0 ">
+            <b-col md="6" cols="12" style="cursor:pointer;" class="text-md-right pl-md-0 ">
                  <span :class="'text-gray'" @click="logOut">Logout</span> 
             </b-col>
          </b-row>

@@ -8,6 +8,7 @@ import Lesson from './modules/Lesson'
 import Member from './modules/Member'
 import Corporate from './modules/Corporate'
 import Booking from './modules/Booking'
+import Message from './modules/Message'
 
 Vue.use(Vuex)
 
@@ -29,6 +30,7 @@ export default new Vuex.Store({
     Lesson,
     Member,
     Corporate,
-    Booking
+    Booking,
+    Message
   }
 })

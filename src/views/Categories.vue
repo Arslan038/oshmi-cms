@@ -30,7 +30,7 @@
             <b-row class="mt-2" v-if="!loading && categories.length">
                 <b-col md="6" cols="12">
                     
-                    <b-table bordered :responsive="true" striped hover :fields="fields" :items="categoryList" :filter="filter">
+                    <b-table bordered :responsive="true" striped hover :fields="fields" :items="categories" :current-page="currentPage" :per-page="rowsPerPage" :filter="filter">
                         <template v-slot:head(name)>
                             <span class="smalls">Name</span>
                         </template>
@@ -54,7 +54,7 @@
                         </template>
                     </b-table>
                     <div class="float-right">
-                        <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" pills></b-pagination>
+                        <b-pagination v-model="currentPage" :total-rows="categories.length" :per-page="rowsPerPage" class="my-0" pills></b-pagination>
                     </div>
                 </b-col>
 
@@ -131,16 +131,6 @@ export default {
     name: 'Categories',
     computed: {
         ...mapGetters(['getCategories']),
-        categoryList() {
-            const items = this.categories
-            if(items) {
-                return items.slice(
-                    (this.currentPage - 1) * this.perPage,
-                    this.currentPage * this.perPage
-                )
-            }
-            return null
-        }
     },
     components: {
         Header,

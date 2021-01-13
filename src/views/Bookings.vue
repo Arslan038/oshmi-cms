@@ -37,7 +37,7 @@
             </div>
 
             <div class="mt-3" v-if="!loading && bookings.length">
-                <b-table bordered :responsive="true" striped hover :fields="fields" :items="bookings">
+                <b-table bordered :responsive="true" striped hover :fields="fields" :current-page="currentPage" :per-page="rowsPerPage" :items="bookings">
                     <!-- Cells -->
                     <template v-slot:cell(lesson)="data">
                         <span class="smalls">{{data.item.Lesson.name}}</span>
@@ -64,7 +64,7 @@
                 </b-table>
 
                 <div class="float-right">
-                    <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" pills></b-pagination>
+                    <b-pagination v-model="currentPage" :total-rows="bookings.length" :per-page="rowsPerPage" class="my-0" pills></b-pagination>
                 </div>
             </div>
         </b-container>
@@ -183,8 +183,6 @@ export default {
             "Booked By": "bookedBy"
         },
         export_data: [],
-
-        totalRows: 1,
         currentPage: 1,
         perPage: 10,
 

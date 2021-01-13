@@ -6,8 +6,8 @@
            <div class="text-left text-light-gray"> <h5>{{title}}</h5> </div>
            <div>
             <b-breadcrumb class="bg-white">
-              <b-breadcrumb-item href="">
-                <span class="fa fa-home"></span>
+              <b-breadcrumb-item @click="$router.push('/')">
+                <span class="fa fa-home"></span> Dashboard
               </b-breadcrumb-item>
               <b-breadcrumb-item v-for="(item, index) in breadcrumb" :key="index" @click="item.path ? $router.push(item.path) : ''" :active="item.active">{{item.text}}</b-breadcrumb-item>
             </b-breadcrumb>

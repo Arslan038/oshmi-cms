@@ -44,7 +44,7 @@
       </div>
 
       <div class="mt-3" v-if="!loading && members.length">
-         <b-table bordered :responsive="true" :fields="fields" :items="memberList" :filter="filter">
+         <b-table bordered :responsive="true" :fields="fields" :items="members" :current-page="currentPage" :per-page="rowsPerPage" :filter="filter">
             <!-- Cells -->
             <template v-slot:cell(licenses)="data">
               <span v-if="data.item.licenses && data.item.licenses.length" @click="openLicenseModal(data.item)" class="text-primary link">View Licenses</span>
@@ -59,7 +59,7 @@
           <b-pagination
             v-model="currentPage"
             :total-rows="totalRows"
-            :per-page="perPage"
+            :per-page="rowsPerPage"
             class="my-0"
             pills
           ></b-pagination>
@@ -107,16 +107,6 @@ export default {
     totalRows() {
       return this.members.length
     },
-    memberList() {
-      const items = this.members
-      if(items) {
-          return items.slice(
-              (this.currentPage - 1) * this.perPage,
-              this.currentPage * this.perPage
-          )
-      }
-      return null
-    }
   },
   async created() {
     if(!this.getIndividualMembers.length) {

@@ -44,7 +44,7 @@
       </div>
 
       <div class="mt-3" v-if="!loading && members.length">
-         <b-table :responsive="true" :fields="fields" bordered :items="memberList" :filter="filter">
+         <b-table :responsive="true" :fields="fields" bordered :items="members" :current-page="currentPage" :per-page="rowsPerPage" :filter="filter">
            
             <!-- Cells -->
           
@@ -55,7 +55,7 @@
                 <span class="smalls">{{getDate(data.item.discountEndDate)}}</span>
             </template>
             <template v-slot:cell(balance)="data">
-                <strong v-if="data.item.bookings.length" class="link text-purple">{{calculateBalance(data.item.bookings)}}</strong>
+                <strong v-if="data.item.bookings.length" @click="openSettleModal(data.item)" class="link text-purple">{{calculateBalance(data.item.bookings)}}</strong>
                 <span v-else>0 HKD</span>
             </template>
             
@@ -68,27 +68,43 @@
           <b-pagination
             v-model="currentPage"
             :total-rows="totalRows"
-            :per-page="perPage"
+            :per-page="rowsPerPage"
             class="my-0"
             pills
           ></b-pagination>
         </div>
       </div>
     </b-container>
-    <b-modal id="del-modal" hide-footer centered>
-            <b-container class="text-center">
-                <p> <b>Are you sure to delete the following member ?</b> </p>
-                <h5 class="text-purple">Gammon Ltd</h5>
-                <div>
-                <b-button size="lg" variant="danger" pill>
-                    Yes
-                </b-button>
-                <b-button class="ml-3" size="lg" variant="danger" pill>
-                    Cancel
-                </b-button>
-                </div>
-            </b-container>
-        </b-modal>
+    <b-modal title="Settle Payment" v-model="settleModal" hide-footer>
+      <b-table-simple v-if="settleData">
+        <b-thead>
+          <b-th class="select-width">Select</b-th>
+          <b-th>Month</b-th>
+          <b-th>Amount</b-th>
+        </b-thead>
+        <b-tbody>
+          <b-tr v-for="(payment, index) in settleData.bookings" :key="index">
+            <b-td class="select-width">
+              <b-form-checkbox @change="setItemsToSettle(payment, $event)" :checked="getItemToSettle(payment)"></b-form-checkbox>
+            </b-td>
+            <b-td>
+              <span>{{payment.month}} - {{payment.year}}</span>
+            </b-td>
+            <b-td>
+              <span>{{payment.price}} HKD</span>
+            </b-td>
+          </b-tr>
+        </b-tbody>
+      </b-table-simple>
+      <b-row>
+        <b-col cols="12" class="text-center">
+          <p><strong>Total Sum: <span class="text-purple">{{totalPrice}} HKD</span></strong></p>
+          <b-button variant="danger">Settle Payment</b-button>
+        </b-col>
+      </b-row>
+    </b-modal>
+
+
 
   </div>
 </template>
@@ -111,16 +127,6 @@ export default {
     totalRows() {
       return this.members.length
     },
-    memberList() {
-      const items = this.members
-      if(items) {
-          return items.slice(
-              (this.currentPage - 1) * this.perPage,
-              this.currentPage * this.perPage
-          )
-      }
-      return null
-    }
   },
   async created() {
     if(!this.getCorporateMembers.length) {
@@ -143,6 +149,33 @@ export default {
   },
   methods: {
     ...mapActions(["fetchCorporateMembers"]),
+    openSettleModal(data) {
+      this.itemsToSettle.corporateId = data.id
+      this.itemsToSettle.data = []
+      this.settleData = Object.assign({}, data)
+      this.settleModal = true
+    },
+    async setItemsToSettle(item, e) {
+      if(e) {
+        this.itemsToSettle.data.push(item)
+      }
+      else {
+        this.itemsToSettle.data = await this.itemsToSettle.data.filter(data => data.month != item.month && data.year != item.year)
+      }
+      this.totalPrice = 0
+      await this.itemsToSettle.data.forEach(data => {
+        console.log(data)
+        this.totalPrice = Number(this.totalPrice) + Number(data.price)
+      })
+      console.log(this.totalPrice)
+    },
+    getItemToSettle(item) {
+      const isItemExists = this.itemsToSettle.data.find(data => data.month == item.month && data.year == item.year)
+      if(isItemExists) {
+        return true
+      }
+      return false
+    },
     calculateBalance(bookings) {
       let balance = 0;
       if(bookings.length) {
@@ -157,7 +190,14 @@ export default {
     return {
       members: [],
       loading: false,
+      settleModal: false,
+      totalPrice: 0,
+      itemsToSettle: {
+        corporateId: null,
+        data: []
+      },
       filter: null,
+      settleData: null,
       fields: [
         {
           key: 'corporateName',
@@ -227,5 +267,9 @@ export default {
 }
 .rounded {
   border-radius: 1.25rem !important;
+}
+.select-width {
+  width: 70px !important;
+  max-width: 70px !important;
 }
 </style>

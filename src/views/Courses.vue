@@ -36,7 +36,7 @@
             </div>
 
             <div class="mt-3">
-                <b-table v-if="!loading && courses.length" bordered :responsive="true" striped hover :fields="fields" :filter="filter" :items="courseList">
+                <b-table v-if="!loading && courses.length" bordered :responsive="true" :current-page="currentPage" :per-page="rowsPerPage" striped hover :fields="fields" :filter="filter" :items="courses">
                     <!-- Cells -->
                     <template v-slot:cell(periods)="data">
                         <span class="text-primary link" @click="viewLessons(data.item)">View Lessons</span>
@@ -66,7 +66,7 @@
                 </b-table>
 
                 <div class="float-right">
-                    <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" pills></b-pagination>
+                    <b-pagination v-model="currentPage" :total-rows="courses.length" :per-page="rowsPerPage" class="my-0" pills></b-pagination>
                 </div>
             </div>
         </b-container>
@@ -314,17 +314,6 @@ export default {
     },
     computed: {
         ...mapGetters(['getCourses', 'getCategories', 'getCourseLessons', 'getTutors']),
-        courseList() {
-            const items = this.courses
-            if(items) {
-                return items.slice(
-                    (this.currentPage - 1) * this.perPage,
-                    this.currentPage * this.perPage
-                )
-            }
-            return null
-        },
-
         sortedLessons() {
             const items = this.courseLessons
             return items.sort((a,b) => a.endDate > b.endDate ? 1 : -1)

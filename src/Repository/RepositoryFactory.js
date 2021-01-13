@@ -6,6 +6,7 @@ import LessonRepository from './LessonRepository';
 import MemberRepository from './MemberRepository';
 import CorporateRepository from './CorporateRepository';
 import BookingRepository from './BookingRepository';
+import MessageRepository from './MessageRepository';
 
 const repositories = {
     user_repository: UserRepository,
@@ -16,6 +17,7 @@ const repositories = {
     member_repository: MemberRepository,
     corporate_repository: CorporateRepository,
     booking_repository: BookingRepository,
+    message_repository: MessageRepository,
 }
 
 export const RepositoryFactory = {

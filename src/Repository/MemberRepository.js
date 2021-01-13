@@ -2,6 +2,7 @@ import Repository from './Repository'
 
 const create_individual_member = 'individualmember/create'
 const individual_member = 'individualmember'
+const search = `members/search/phone`
 
 export default {
     // Create Individual Member
@@ -21,5 +22,10 @@ export default {
     // Update Individual Member
     updateIndividualMember(payload) {
         return Repository.put(`${individual_member}/${payload.id}`, payload)
+    },
+
+    // Search By Phone
+    searchByPhone(payload) {
+        return Repository.get(`${search}/${payload}`)
     }
 }

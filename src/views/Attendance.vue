@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <Header msg="Welcome to Your Vue.js App" />
-    <SecondaryHeader  title="Attendance" />
+    <SecondaryHeader  title="Attendance" :breadcrumb="breadcrumb" />
     <b-container class="card bg-white mt-2 pb-5 pt-2">
       <CorporateHeader
         :create="false"
@@ -43,7 +43,8 @@
           <select class="form-control rounded" v-model="filter">
             <option :value="null" selected disabled>--Select--</option>
             <option value="pending">Pending</option>
-            <option value="completed">Completed</option>
+            <option value="finished">Finished</option>
+            <option value="absent">Absent</option>
             <option value="failed">Failed</option>
 
           </select>
@@ -60,7 +61,7 @@
       </div>
 
       <div class="mt-3" v-if="!loading && bookings.length">
-         <b-table bordered :responsive="true" :fields="fields" :filter="filter" :items="bookings">
+         <b-table bordered :responsive="true" :fields="fields" :filter="filter" :items="bookings" :current-page="currentPage" :per-page="rowsPerPage">
             <!-- Cells -->
             <template v-slot:cell(name)="data">
                 <span class="smalls">{{data.item.IndividualMember.firstName}} {{data.item.IndividualMember.lastName}} </span>
@@ -86,6 +87,15 @@
                 <b-button @click="update(data.item)" v-if="data.item.status=='pending'" size="sm" variant="outline-info" class="rounds">
                   {{data.item.status}}
                 </b-button>
+                <b-button @click="update(data.item)" v-if="data.item.status=='finished'" size="sm" variant="success" class="rounds">
+                  {{data.item.status}}
+                </b-button>
+                <b-button @click="update(data.item)" v-if="data.item.status=='absent'" size="sm" variant="outline-warning" class="rounds">
+                  {{data.item.status}}
+                </b-button>
+                <b-button @click="update(data.item)" v-if="data.item.status=='failed'" size="sm" variant="warning" class="rounds">
+                  {{data.item.status}}
+                </b-button>
             </template>
             <template v-slot:cell(action)="">
                <router-link to="/member-info"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link> 
@@ -95,8 +105,8 @@
         <div class="float-right">
           <b-pagination
             v-model="currentPage"
-            :total-rows="totalRows"
-            :per-page="perPage"
+            :total-rows="bookings.length"
+            :per-page="rowsPerPage"
             class="my-0"
             pills
           ></b-pagination>
@@ -237,9 +247,14 @@ export default {
         }
       ],
       filter: null,
-      totalRows: 1,
       currentPage: 1,
       perPage: 10,
+      breadcrumb: [
+        {
+          text: 'Individual Attendance',
+          active: true
+        }
+      ]
     };
   },
 };

@@ -1,4 +1,9 @@
 export default {
+    data() {
+        return {
+            rowsPerPage: 10
+        }
+    },
     methods: {
         getLoggedUser() {
             const loggedUser = JSON.parse(localStorage.getItem('oshmiAdmin'));
@@ -33,6 +38,20 @@ export default {
             var newDate = getMonth + " " + getDay + ", " + getYear
 
             return newDate
+        },
+        getSeparatedDate(date) {
+            let customDate = date.split('T')[0]
+            customDate = customDate.split('-')
+            var months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+            var getMonth = months[customDate[1] - 1]
+            var getDay = customDate[2];
+            var getYear = customDate[0];
+
+            return {
+                month: getMonth,
+                day: getDay,
+                year: getYear
+            }
         },
         getLicenses() {
             return [

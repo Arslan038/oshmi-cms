@@ -35,7 +35,7 @@
             </div>
 
             <div class="mt-3" v-if="!loading && lessons.length">
-                <b-table bordered :responsive="true" striped hover :fields="fields" :items="lessonList" :filter="filter">
+                <b-table bordered :responsive="true" :current-page="currentPage" :per-page="rowsPerPage" striped hover :fields="fields" :items="lessons" :filter="filter">
 
                     <!-- Cells -->
                     <template v-slot:cell(courseTitle)="data">
@@ -62,7 +62,7 @@
                 </b-table>
 
                 <div class="float-right">
-                    <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" pills></b-pagination>
+                    <b-pagination v-model="currentPage" :total-rows="lessons.length" :per-page="rowsPerPage" class="my-0" pills></b-pagination>
                 </div>
             </div>
         </b-container>
@@ -137,17 +137,6 @@ export default {
     },
     computed: {
         ...mapGetters(['getLessons', 'getTutors']),
-        lessonList() {
-            let items = this.lessons
-            if(items) {
-                items = items.sort((a,b) => a.endDate > b.endDate ? 1 : -1)
-                return items.slice(
-                    (this.currentPage - 1) * this.perPage,
-                    this.currentPage * this.perPage
-                )
-            }
-            return null
-        }
     },
     methods: {
         ...mapActions(["fetchLessons", "fetchTutors", "updateLesson"]),
@@ -221,7 +210,7 @@ export default {
 
                     lessonArray.push(item)
                 })
-                lessonArray = lessonArray.sort((a,b) => a.endDate - a.startDate)
+                lessonArray = lessonArray.sort((a,b) => new Date(a.startDate) - new Date(b.startDate))
                 this.lessons = lessonArray
             }
         },
@@ -285,7 +274,6 @@ export default {
             ],
             currentPage: 1,
             perPage: 10,
-            totalRows: 1,
             breadcrumb: [
                 {
                     text: 'Lessons',

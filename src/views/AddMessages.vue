@@ -3,51 +3,57 @@
     <Header msg="Welcome to Your Vue.js App" />
     <SecondaryHeader msg="Welcome to Your Vue.js App" />
     <b-container class="card bg-white mt-2 pb-5 pt-2">
-     
-        <b-row class="mt-3">
-            <b-col md="3" class="text-left" cols="12">
-                <h6><b>Image.</b></h6>
-            </b-col>
-            <b-col md="7" cols="12">
-                <input type="file" class="form-control roundeds"/>
-               
-            </b-col>
-        </b-row>
-        <b-row class="mt-3">
-            <b-col md="3" class="text-left" cols="12">
-                <h6><b>Full text</b></h6>
-            </b-col>
-            <b-col md="7" cols="12" class="text-left">
-                <b-textarea rows="10" placeholder="Type here">
+        <b-form @submit.prevent="sendMessage">
+            <b-row class="mt-3">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Full text</b></h6>
+                </b-col>
+                <b-col md="7" cols="12" class="text-left">
+                    <b-textarea rows="10" placeholder="Type here" v-model="message.text" required></b-textarea>
+                </b-col>
+            </b-row>
+            <b-row class="mt-3">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Send To</b></h6>
+                </b-col>
+                <b-col md="7" cols="12" class="text-left">
+                    <b-form-select v-model="message.sentTo" @change="message.users = []" required>
+                        <b-form-select-option :value="null">Select Send To</b-form-select-option>
+                        <b-form-select-option value="All">All Members</b-form-select-option>
+                        <b-form-select-option value="All Individual Members">All Individual Members</b-form-select-option>
+                        <b-form-select-option value="All Corporate Members">All Corporate Members</b-form-select-option>
+                        <b-form-select-option value="Specific Corporate Members">Specific Corporate Members</b-form-select-option>
+                        <b-form-select-option value="Specific Individual Members">Specific Individual Members</b-form-select-option>
+                    </b-form-select>
+                </b-col>
+            </b-row>
+            <b-row class="mt-3" v-if="message.sentTo == 'Specific Corporate Members'">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Select Corporate Members</b></h6>
+                </b-col>
+                <b-col md="7" cols="12" class="text-left">
+                    <multiselect v-model="message.users" :options="getCorporateMembers" :tagabled="true" :multiple="true" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Corporate Members" tag-placeholder="Select Corporate Members" label="corporateName" track-by="corporateName" :preselect-first="false">
+                    </multiselect>
+                </b-col>
+            </b-row>
+            <b-row class="mt-3" v-if="message.sentTo == 'Specific Individual Members'">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Select Individual Members</b></h6>
+                </b-col>
+                <b-col md="7" cols="12" class="text-left">
+                    <multiselect v-model="message.users" :options="getIndividualMembers" :tagabled="true" :multiple="true" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Individual Members" tag-placeholder="Select Individual Members" label="email" track-by="email" :preselect-first="false">
+                        <template slot="singleLabel" slot-scope="{ option }"><strong>{{ option.name }}</strong></template>
+                    </multiselect>
+                </b-col>
+            </b-row>
+            <b-row>
+                <b-col cols="12" class="text-left mt-5">
+                    <b-button variant="danger" type="submit" pill :disabled="createLoading">{{createLoading ? 'Sending Message...' : 'Send Message'}}</b-button>
+                </b-col>
+            </b-row>
+        </b-form>
 
-                </b-textarea>
-            </b-col>
-        </b-row>
-
-         <b-row class="mt-2">
-            <b-col md="3" class="text-left" cols="12">
-                <h6><b>URL link</b></h6>
-            </b-col>
-            <b-col md="7" cols="12">
-                <b-input placeholder="http://www.domain.com" class="roundeds"></b-input>
-               
-            </b-col>
-        </b-row>
-        <b-row class="mt-2">
-            <b-col md="3" class="text-left" cols="12">
-                <h6><b>Schedule</b></h6>
-            </b-col>
-            <b-col md="4" cols="12">
-                <div class="d-flex">
-                    <b-input type="date" style="border-bottom-left-radius:1.25rem;border-top-left-radius:1.25rem;border-top-right-radius:0px!important;border-bottom-right-radius:0px!important"></b-input>
-                    <b-input type="time" style="border-bottom-right-radius:1.25rem;border-top-right-radius:1.25rem;border-top-left-radius:0px!important;border-bottom-left-radius:0px!important"></b-input>
-                </div>
-                <div class="d-flex mt-3">
-                    <b-button v-b-modal.delact  pill variant="outline-secondary ml-2" class="d-block mt-md-2 mt-md-2 pr-5 pl-5" >Save</b-button>
-                    <b-button pill variant="outline-secondary ml-2" class="d-block mt-md-2 mt-md-2 pr-5 pl-5" >Cancel</b-button>
-                </div>
-            </b-col>
-        </b-row>
+         
      <b-modal id="delact" hide-footer centered>
       <b-container class="text-center">
         <p> <b>The message has been sent successfully</b> </p>
@@ -63,30 +69,100 @@
       </b-container>
 
     </b-modal>
-  
-     
-
     </b-container>
-
-
-    
-
-        
     </div>
 </template>
 
 <script>
 import Header from "@/components/Header.vue";
 import SecondaryHeader from "@/components/SecondaryHeader.vue";
-
+import {mapActions, mapGetters} from 'vuex'
 import MembersHeader from "../components/MembersHeader.vue";
+import Multiselect from 'vue-multiselect';
 export default {
-  name: "Orders",
+  name: "AddMessage",
   components: {
     Header,
     SecondaryHeader,
     MembersHeader,
+    Multiselect
   },
+  computed: {
+    ...mapGetters(['getIndividualMembers', 'getCorporateMembers'])
+  },
+  methods: {
+    ...mapActions(["fetchIndividualMembers", "fetchCorporateMembers", "createMessage"]),
+    async sendMessage() {
+        if(this.message.sentTo == "All") {
+            this.message.users = []
+            this.message.users = this.getIndividualMembers
+            this.message.users = this.message.users.concat(this.getCorporateMembers)
+        }
+        if(this.message.sentTo == "All Individual Members") {
+            this.message.users = []
+            this.message.users = this.getIndividualMembers
+        }
+        if(this.message.sentTo == "All Corporate Members") {
+            this.message.users = []
+            this.message.users = this.getCorporateMembers
+        }
+
+        if(this.message.users.length < 1) {
+            this.toast({title: "Create Message", message: "Please Select atleast 1 User", type: "warning"})
+            return
+        }
+
+        let usersArray = []
+        this.message.users.forEach(user => {
+            usersArray.push(user.id)
+        })
+
+        this.message.users = usersArray
+
+        this.message.date = new Date().toISOString()
+        this.message.time = new Date().toTimeString()
+
+        this.createLoading = true
+        const resp = await this.createMessage(this.message)
+        this.createLoading = false
+        if(resp == 1) {
+            this.$router.push('/messages')
+        }
+
+    }
+  },
+  async created() {
+      if(!this.getIndividualMembers.length) {
+        await this.fetchIndividualMembers()
+      }
+      if(!this.getCorporateMembers.length) {
+        await this.fetchCorporateMembers()
+      }
+  },
+//   watch: {
+//       getIndividualMembers(val) {
+//         this.members = this.getIndividualMembers
+//       },
+//       getCorporateMembers(val) {
+//         if(this.members.length) {
+//             this.members.concat(this.getCorporateMembers)
+//         }
+//       }
+//   },
+  data() {
+      return {
+          loading: false,
+          createLoading: false,
+          members: [],
+          message: {
+              text: null,
+              date: null,
+              time: null,
+              sentTo: null,
+              users: []
+          }
+      }
+  }
 }
 </script>
 

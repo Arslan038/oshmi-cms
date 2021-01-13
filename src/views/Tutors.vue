@@ -35,7 +35,7 @@
             </div>
 
             <div class="mt-3" v-if="!loading && tutors.length">
-                <b-table :responsive="true" striped hover :fields="fields" :items="tutorList" :filter="filter">
+                <b-table :responsive="true" striped hover :fields="fields" :items="tutors" :per-page="rowsPerPage" :current-page="currentPage" :filter="filter">
                     <template v-slot:cell(courseCount)="data">
                         {{data.item.courseCount ? data.item.courseCount : 0}}
                     </template>
@@ -46,7 +46,7 @@
                 </b-table>
 
                 <div class="float-right">
-                    <b-pagination v-model="currentPage" :total-rows="totalRows" :per-page="perPage" class="my-0" pills></b-pagination>
+                    <b-pagination v-model="currentPage" :total-rows="tutors.length" :per-page="rowsPerPage" class="my-0" pills></b-pagination>
                 </div>
             </div>
         </b-container>
@@ -76,19 +76,6 @@ export default {
     name: 'Tutors',
     computed: {
         ...mapGetters(['getTutors']),
-        tutorList() {
-            const items = this.tutors
-            if(items) {
-                return items.slice(
-                    (this.currentPage - 1) * this.perPage,
-                    this.currentPage * this.perPage
-                )
-            }
-            return null
-        },
-        totalRows() {
-            return this.tutors.length
-        }
     },
     components: {
         Header,

@@ -90,8 +90,28 @@ const actions = {
             }
         }
         catch(err) {
-            console.log(err.response)
             commit("setToast", {message: err.message, title: "Update Corporate Member", type: "danger"})
+            return 0
+        }
+    },
+
+    // Settle Corporate Payment
+    async settleCorporatePayment({commit}, payload) {
+        try {
+            const resp = await CorporateRepository.settlePayment(payload);
+            console.log(resp.data)
+            if(resp.data.status) {
+                commit('updateCorporateBalance', payload)
+                commit("setToast", {message: resp.data.message, title: "Settle Payment", type: "success"})
+                return 1
+            }
+            else {
+                commit("setToast", {message: resp.data.message, title: "Settle Payment", type: "danger"})
+                return 0
+            }
+        }
+        catch(err) {
+            commit("setToast", {message: err.message, title: "Settle Payment", type: "danger"})
             return 0
         }
     }
@@ -111,6 +131,17 @@ const mutations = {
     updateCorporateMember: (state, payload) => {
         state.corporate_members = state.corporate_members.map(t => {
             if(t.id == payload.id) {
+                return Object.assign({}, t, payload)
+            }
+            return t
+        })
+    },
+    updateCorporateBalance: async (state, payload) => {
+        state.corporate_members = await state.corporate_members.map(async t => {
+            if(t.id == payload.corporateId) {
+                await payload.data.forEach(async item => {
+                    t.bookings = await t.bookings.filter(book => book.month != item.month && book.yeat != item.year)
+                })
                 return Object.assign({}, t, payload)
             }
             return t

@@ -5,12 +5,14 @@ const state = {
     individual_members: [],
     individual_member: null,
     new_member: null,
+    searchedMember: null,
 }
 
 const getters = {
     getIndividualMembers: state => state.individual_members,
     getIndividualMember: state => state.individual_member,
-    getNewMember: state => state.new_member
+    getNewMember: state => state.new_member,
+    getSearchedMember: state => state.searchedMember
 }
 
 const actions = {
@@ -91,6 +93,34 @@ const actions = {
             commit("setToast", {message: err.message, title: "Update Individual Member", type: "danger"})
             return 0
         }
+    },
+
+    // Search Member By Phone
+    async searchByPhone({commit}, payload) {
+        try {
+            commit('setSearchedMember', null)
+            const resp = await MemberRepository.searchByPhone(payload);
+            if(resp.data.success) {
+                if(resp.data.members && resp.data.members.length) {
+                    console.log(resp.data.members)
+                    commit('setSearchedMember', resp.data.members[0])
+                    commit("setToast", {message: resp.data.message, title: "Search Member", type: "success"})
+                    return 1
+                }
+                else {
+                    commit("setToast", {message: "Member Not Found.", title: "Search Member", type: "danger"})
+                    return 0
+                }
+            }
+            else {
+                commit("setToast", {message: resp.data.message, title: "Search Member", type: "danger"})
+                return 0
+            }
+        }
+        catch(err) {
+            commit("setToast", {message: err.message, title: "Search Member", type: "danger"})
+            return 0
+        }
     }
 }
 
@@ -114,6 +144,10 @@ const mutations = {
             }
             return t
         })
+    },
+    setSearchedMember: (state, payload) => {
+        console.log(payload)
+        state.searchedMember = payload
     }
 }
 
