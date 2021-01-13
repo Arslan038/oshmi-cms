@@ -3,76 +3,77 @@
         <Header msg="Welcome to Your Vue.js App" />
         <SecondaryHeader title="Export Lesson" :breadcrumb="breadcrumb"/>
         <b-container class="card bg-white mt-2 pb-5 pt-2">
-            <b-row class="mt-4">
-                <b-col md="4" class="text-left">
-                    <h6><b>Class</b></h6>
-                </b-col>
-                <b-col class="text-left">
-                    <h6><b>用中文写东西</b></h6>
-                </b-col>
-            </b-row>
-            <b-row class="mt-3">
-                <b-col md="4" class="text-left">
-                    <h6><b>Course Date</b></h6>
-                </b-col>
-                <b-col class="text-left">
-                    <h6><b>10-10-2020</b></h6>
-                </b-col>
-            </b-row>
-            <b-row class="mt-3">
-                <b-col md="4" class="text-left">
-                    <h6><b>Start Time</b></h6>
-                </b-col>
-                <b-col class="text-left">
-                    <h6><b>12:00</b></h6>
-                </b-col>
-            </b-row>
-            <b-row class="mt-3">
-                <b-col md="4" class="text-left">
-                    <h6><b>End Time</b></h6>
-                </b-col>
-                <b-col class="text-left">
-                    <h6><b>14:00-10-2020</b></h6>
-                </b-col>
-            </b-row>
-            <b-row class="mt-3">
-                <b-col md="4" class="text-left">
-                    <h6><b>Registered Students</b></h6>
-                </b-col>
-                <b-col class="text-left">
-                    <h6><b>20 of 20 </b></h6>
+            <b-row v-if="loading">
+                <b-col cols="12" class="text-center mt-3">
+                    <b-spinner variant="purple"></b-spinner>
+                    <p>Loading Lesson Bookings...</p>
                 </b-col>
             </b-row>
 
-            <div class="mt-3">
-                <b-table :responsive="true" bordered :fields="fields" :items="view_able_orders">
-                    <template v-slot:head(student_name)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-                    <template v-slot:head(student_id)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-                    <template v-slot:head(arrival_time)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-                    <template v-slot:head(signature)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
+            <b-row v-if="!loading && !bookings.length">
+                <b-col cols="12" class="text-center mt-3">
+                    <h5 class="text-purple">No Booking Found...</h5>
+                </b-col>
+            </b-row>
+
+            <div v-if="bookings.length && !loading">
+                <b-row class="mt-4">
+                    <b-col md="4" class="text-left">
+                        <h6><strong>Lesson Name</strong></h6>
+                    </b-col>
+                    <b-col class="text-left">
+                        <h6>{{lesson.name}}</h6>
+                    </b-col>
+                </b-row>
+                <b-row class="mt-3">
+                    <b-col md="4" class="text-left">
+                        <h6><strong>Lesson Code</strong></h6>
+                    </b-col>
+                    <b-col class="text-left">
+                        <h6>{{lesson.lessonCode}}</h6>
+                    </b-col>
+                </b-row>
+                <b-row class="mt-3">
+                    <b-col md="4" class="text-left">
+                        <h6><b>Lesson Date</b></h6>
+                    </b-col>
+                    <b-col class="text-left">
+                        <h6>{{getDate(lesson.startDate)}}</h6>
+                    </b-col>
+                </b-row>
+                <b-row class="mt-3">
+                    <b-col md="4" class="text-left">
+                        <h6><b>Start Time</b></h6>
+                    </b-col>
+                    <b-col class="text-left">
+                        <h6>{{lesson.startTime}}</h6>
+                    </b-col>
+                </b-row>
+                <b-row class="mt-3">
+                    <b-col md="4" class="text-left">
+                        <h6><strong>End Time</strong></h6>
+                    </b-col>
+                    <b-col class="text-left">
+                        <h6>{{lesson.endTime}}</h6>
+                    </b-col>
+                </b-row>
+            </div>
+
+            <div class="mt-3" v-if="!loading && bookings.length">
+                <b-table :responsive="true" bordered :fields="fields" :items="bookings">
 
                     <!-- Cells -->
-
-                    <template v-slot:cell(student_name)="data">
-                        <span class="smalls">{{data.item.student_name}} </span>
+                    <template v-slot:cell(id)="data">
+                        <span class="smalls">{{data.index+1}}</span>
                     </template>
-                    <template v-slot:cell(student_id)="data">
-                        <span class="smalls">{{data.item.student_id}}</span>
+                    <template v-slot:cell(name)="data">
+                        <span class="smalls">{{data.item.IndividualMember.firstName}} {{data.item.IndividualMember.lastName}}</span>
                     </template>
-
-                    <template v-slot:cell(arrival_time)="data">
-                        <span class="smalls">{{data.item.arrival_time}}</span>
+                    <template v-slot:cell(email)="data">
+                        <span class="smalls">{{data.item.IndividualMember.email}}</span>
                     </template>
-                    <template v-slot:cell(signature)="data">
-                        <span class="smalls">{{data.item.signature}} </span>
+                    <template v-slot:cell(company)="data">
+                        <span class="smalls">{{data.item.corporateId ? data.item.CorporateMember.corporateName : ''}} </span>
                     </template>
                 </b-table>
             </div>
@@ -100,15 +101,15 @@ export default {
     },
 
     async created() {
-        if(!this.getBookings.length) {
-            this.loading = true
-            await this.fetchBookings()
-            this.loading = false
-        }
+        this.loading = true
+        await this.fetchBookings()
+        this.loading = false
     },
     watch: {
-        getBookings(val) {
+        async getBookings(val) {
             if(val) {
+                this.bookings = await val.filter(booking => booking.lessonId == this.$route.params.id)
+                this.lesson = this.bookings[0].Lesson
             }
         }
     },
@@ -117,23 +118,34 @@ export default {
     },
     data() {
         return {
+            bookings: [],
+            loading: false,
+            lesson: null,
             fields: [
                 {
-                    key: "id",
-                    label: "No",
+                    key: 'id',
+                    label: 'No'
                 },
                 {
-                    key: "memberFirstName",
-                    label: "First Name"
+                    key: "company",
+                    label: "Company",
                 },
                 {
-                    key: "memberLaststName",
-                    label: "Last Name"
-                }
+                    key: "name",
+                    label: "Name"
+                },
+                {
+                    key: "email",
+                    label: "Email"
+                },
+                {
+                    key: 'position',
+                    label: "Position"
+                },
+                {
+                    label: "Signature"
+                },
             ],
-            view_able_orders:[
-           
-          ],
           breadcrumb: [
                 {
                     text: 'Lessons',

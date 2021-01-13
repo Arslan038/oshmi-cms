@@ -20,7 +20,7 @@
         <b-col md="1" cols="6" class="mt-md-0 mt-2">
           <b-button :variant="$route.name=='Tutors' ? 'danger':'outline-danger'" @click="$router.push('/tutors')"  pill>Tutors</b-button>
         </b-col>
-        <b-col md="6" cols="6" v-if="create==true"  class="mdwidths text-md-right mt-md-0 mt-2">
+        <b-col md="6" cols="6" v-if="create==true"  class="mdwidths text-right mt-md-0 mt-2">
           <b-button variant="outline-secondary" class="text-purple" pill @click=" $router.push(reroute)" ><i class="fas fa-plus-circle"></i> {{addtext}}</b-button>
         </b-col>
       </b-row>

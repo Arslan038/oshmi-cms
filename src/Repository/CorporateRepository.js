@@ -1,7 +1,7 @@
 import Repository from './Repository'
 
 const create_corporate_member = 'corporatemember/create'
-const corporate_member = 'corporatemember'
+const corporate_member = 'corporatemember/balance'
 
 export default {
     // Create Corporate Member

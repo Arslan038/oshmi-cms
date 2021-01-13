@@ -47,14 +47,17 @@
          <b-table :responsive="true" :fields="fields" bordered :items="memberList" :filter="filter">
            
             <!-- Cells -->
-           
+          
             <template v-slot:cell(discountValue)="data">
-                <span class="smalls">{{data.item.discountValue}} HKD</span>
+                <span class="smalls">-{{data.item.discountValue}} HKD</span>
             </template>
             <template v-slot:cell(discountEndDate)="data">
                 <span class="smalls">{{getDate(data.item.discountEndDate)}}</span>
             </template>
-            
+            <template v-slot:cell(balance)="data">
+                <strong v-if="data.item.bookings.length" class="link text-purple">{{calculateBalance(data.item.bookings)}}</strong>
+                <span v-else>0 HKD</span>
+            </template>
             
             <template v-slot:cell(action)="data">
               <i @click="$router.push('/edit-corporate/'+data.item.id)" class="ml-2 mr-2 text-info fas fa-pencil-alt link"></i>
@@ -139,7 +142,16 @@ export default {
     }
   },
   methods: {
-    ...mapActions(["fetchCorporateMembers"])
+    ...mapActions(["fetchCorporateMembers"]),
+    calculateBalance(bookings) {
+      let balance = 0;
+      if(bookings.length) {
+        bookings.forEach(item => {
+          balance = balance + item.price
+        })
+      }
+      return balance + " HKD"
+    },
   },
   data() {
     return {
@@ -174,6 +186,12 @@ export default {
         {
           key: 'discountType',
           label: 'Discount Type',
+          sortable: true,
+          sortByFormatted: true
+        },
+        {
+          key: 'balance',
+          label: 'Outstanding Balance',
           sortable: true,
           sortByFormatted: true
         },

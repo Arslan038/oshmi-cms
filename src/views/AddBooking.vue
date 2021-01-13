@@ -3,7 +3,34 @@
         <Header msg="Welcome to Your Vue.js App" />
         <SecondaryHeader title="Book Lesson" :breadcrumb="breadcrumb" />
         <b-container class="card bg-white mt-2 pb-5 pt-2">
-            <div v-if="new_member==false">
+            <b-row>
+                <b-col cols="12" class="text-left">
+                    <h4 class="text-purple mb-5 mt-3">New Booking</h4>
+                </b-col>
+            </b-row>
+            <b-row class="mb-5">
+                <b-col md="6" cols="12">
+                    <b-button class="roundeds" @click="tab = 1" :variant="tab == 1 ? 'danger':'outline-danger'" block size="lg">Select Student Type</b-button>
+                </b-col>
+                <b-col md="6" cols="12" class="mt-md-0 mt-2">
+                    <b-button class="roundeds" @click="tab = 2" :variant="tab == 2 ? 'danger':'outline-danger'" size="lg" block :disabled="tab == 1">Select Lessons</b-button>
+                </b-col>
+            </b-row>
+            <b-row v-if="tab == 1">
+                <b-col md="3" cols="12" class="text-left">
+                    <h6 class="pt-2"><b>Select Student type</b></h6>
+                </b-col>
+                <b-col md="7" cols="12" class="text-left">
+                    <b-form-select @change="setType" v-model="selected" class="roundeds">
+                        <b-form-select-option :value="null">--Select Student Type--</b-form-select-option>
+                        <b-form-select-option value="new_member">New Student</b-form-select-option>
+                        <b-form-select-option value="existing_member">Exisiting Student</b-form-select-option>
+                        <b-form-select-option value="corporate">Corporate</b-form-select-option>
+                    </b-form-select>
+                </b-col>
+            </b-row>
+            
+            <!-- <div v-if="new_member==false">
                 <div class="mt-2 text-left text-primary">
                     <h4 class="text-purple mb-5">New Booking</h4>
                 </div>
@@ -23,40 +50,18 @@
                     <b-col md="6" cols="12">
                         <select v-model="selected" class="roundeds form-control">
                             <option :value="null">--Select Student Type--</option>
-                            <option value="new_student">New student member</option>
-                            <option value="existing_Student">Exisiting student member</option>
-                            <option value="new_corporate">New corporate member</option>
+                            <option value="new_student">New Student</option>
+                            <option value="existing_Student">Exisiting Student</option>
+                            <option value="new_corporate">Corporate</option>
                         </select>
                     </b-col>
                 </b-row>
-            </div>
-
-            <ExisitingMember v-if="selected=='existing_Student' && type == 'student'" />
-            <CorporateMember v-if="selected=='new_corporate' && type == 'student'" />
-            <NewMember @go-back="toggleMember" v-if="selected=='new_student' && type == 'student'" @memberAdded="setLessonType" />
-            <AddLessons @add-lesson="addLesson" v-if="type=='lessons'" class="mt-3" :booking="bookingData" />
-
-            <!-- <div v-if="type=='student'">
-                <b-row class="mt-3">
-                    <b-col cols="12" class="text-right">
-                        <div class="mt-3 d-flex">
-                            <b-button variant="outline-danger" class="mr-2 ml-auto" pill>Next</b-button>
-                            <b-button variant="outline-danger" pill>Cancel</b-button>
-                        </div>
-                    </b-col>
-                </b-row>
             </div> -->
-            <b-modal centered id="added" hide-footer>
-                <h6 class="text-center">The booking(s) has been added successfully</h6>
-                <div class="text-center mt-4">
-                    <b-button pill class="pr-5 pl-5" variant="danger">
-                        Yes
-                    </b-button>
-                    <b-button pill class="p20 ml-2" variant="danger">
-                        Cancel
-                    </b-button>
-                </div>
-            </b-modal>
+
+            <ExisitingMember v-if="tab == 1 && memberBooking.bookedAs=='individual member' && type == 'existing_member'" class="mt-3" @memberSelected="setExistingMember" />
+            <CorporateMember v-if="tab == 1 && memberBooking.bookedAs=='corporate' && type == 'corporate'" class="mt-3" @corporateSelected="setCorporate" />
+            <NewMember v-if="memberBooking.bookedAs=='individual member' && type == 'new_member' && tab == 1" @memberAdded="setLessonType" />
+            <AddLessons v-if="tab == 2" class="mt-2" :booking="bookingData" />
         </b-container>
     </div>
 </template>
@@ -94,14 +99,18 @@ export default {
     },
     data(){
         return {
+            tab: 1,
             selected: null,
             new_member:false,
             type:'student',
             lesson_flag:false,
             memberBooking: {
                 memberId: null,
-                lessonIds: [],
+                corporateId: null,
+                lessonId: null,
                 date: null,
+                bookedAs: null,
+                bookedBy: 'admin',
                 remarks: null
             },
             bookingData: null,
@@ -118,27 +127,47 @@ export default {
             ]
         }
     },
-    watch:{
-        selected(){
-            if(this.selected=='new_student'){
-                // this.new_member=true
-            }
-        }
-    },
     methods:{
+        setType(e) {
+            const value = e
+            if(value) {
+                this.type = value
+                this.memberBooking.memberId = null
+                this.memberBooking.lessonId = null
+                if(value == 'new_member' || value == 'existing_member') {
+                    this.memberBooking.bookedAs = 'individual member'
+                }
+                if(value == 'corporate') {
+                    this.memberBooking.bookedAs = 'corporate'
+                }
+            }
+            else {
+                this.memberBooking.memberId = null
+                this.memberBooking.lessonId = null
+                this.memberBooking.bookedAs = null
+            }
+        },
+        setCorporate(id) {
+            this.memberBooking.memberId = null
+            this.memberBooking.corporateId = id
+            this.bookingData = Object.assign({},this.memberBooking)
+            this.tab = 2
+        },
         toggleMember(arg){
             // this.new_member=arg
             this.selected= null
 
         },
-        addLesson(arg){
-            // this.lesson_flag=arg
-            this.$bvModal.show('added')
+
+        setExistingMember(id) {
+            this.memberBooking.memberId = id
+            this.bookingData = Object.assign({},this.memberBooking)
+            this.tab = 2
         },
 
         setLessonType() {
-            this.type = 'lessons'
             this.bookingData = Object.assign({},this.memberBooking)
+            this.tab = 2
         },
     }
    

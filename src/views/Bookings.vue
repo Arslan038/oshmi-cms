@@ -9,7 +9,20 @@
                 <h4 class="text-purple">Bookings</h4>
             </div>
 
-            <div class="mt-2 text-md-left d-flex">
+            <b-row v-if="loading">
+                <b-col cols="12" class="text-center">
+                    <b-spinner variant="purple"></b-spinner>
+                    <p>Loading Bookings...</p>
+                </b-col>
+            </b-row>
+
+            <b-row v-if="!loading && !bookings.length">
+                <b-col cols="12" class="text-center">
+                    <h5 class="text-purple">No Booking Found</h5>
+                </b-col>
+            </b-row>
+
+            <div class="mt-2 text-md-left d-flex" v-if="!loading && bookings.length">
                 <div class="self-center">
                     Search
                 </div>
@@ -17,70 +30,35 @@
                     <input class="border-hids form-control col-md-12" />
                 </div>
                 <div class="ml-auto">
-                    <b-button variant="info" @click="$router.push('/export-lessons')" class="pr-3 pl-3" pill>Export</b-button>
+                    <download-excel :data="export_data" :export-fields="export_fields" name="Bookings" worksheet="Bookings">
+                        <b-button variant="info" class="pr-3 pl-3" pill>Export</b-button>
+                    </download-excel>
                 </div>
             </div>
 
-            <div class="mt-3">
-                <b-table bordered :responsive="true" striped hover :fields="fields" :items="view_able_orders">
-                    <template v-slot:head(booking_id)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-                    <template v-slot:head(course_title)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-                    <template v-slot:head(candidate_type)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-                    <template v-slot:head(invoice)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-                    <template v-slot:head(lesson_date)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-
-                    <template v-slot:head(booking_date)="data">
-                        <span class="smalls">{{data.label}}</span>
-                    </template>
-
-                    <template v-slot:head(booked_by)="data">
-                        <span class="smalls">{{ data.label }}</span>
-                    </template>
-                    <template v-slot:head(action)="data">
-                        <span class="smalls">{{ data.label }}</span>
-                    </template>
-
+            <div class="mt-3" v-if="!loading && bookings.length">
+                <b-table bordered :responsive="true" striped hover :fields="fields" :items="bookings">
                     <!-- Cells -->
-                    <template v-slot:cell(booking_id)="data">
-                        <span class="smalls">{{data.item.booking_id}} </span>
+                    <template v-slot:cell(lesson)="data">
+                        <span class="smalls">{{data.item.Lesson.name}}</span>
                     </template>
-                    <template v-slot:cell(course_title)="data">
-                        <span class="smalls">{{data.item.course_title}}</span>
+                    <template v-slot:cell(bookedAs)="data">
+                        <span class="smalls">{{data.item.corporateId ? 'Corporate' : 'Student'}}</span>
                     </template>
-                    <template v-slot:cell(candidate_type)="data">
-                        <span class="smalls">{{data.item.candidate_type}}</span>
-                    </template>
-                    <template v-slot:cell(payment)="data">
-                        <span class="smalls">{{data.item.payment}}</span>
-                    </template>
-                    <template v-slot:cell(invoice)="data">
-                        <b-badge variant="danger">{{data.item.invoice}}</b-badge>
-                    </template>
-                    <template v-slot:cell(course_date)="data">
-                        <span class="smalls">{{data.item.course_date}} </span>
+                    <!-- <template v-slot:cell(payment)="data">
+                        <span class="smalls">{{data.item.corporateId ? 'Monthy' : 'Offline'}}</span>
+                    </template> -->
+                    <template v-slot:cell(bookingPrice)="data">
+                        <span>{{data.item.bookingPrice}} HKD</span>
+                        <!-- <b-badge variant="danger">Invoice</b-badge> -->
                     </template>
 
-                    <template v-slot:cell(booking_date)="data">
+                    <template v-slot:cell(createdAt)="data">
                         <span class="smalls">
-                            {{data.item.booking_date}}
+                            {{getDate(data.item.createdAt)}}
                         </span>
                     </template>
-                    <template v-slot:cell(booked_by)="data">
-                        <span class="smalls">
-                            {{data.item.booked_by}}
-                        </span>
-                    </template>
-                    <template v-slot:cell(action)="data">
+                    <template v-slot:cell(action)="">
                         <router-link to="/edit-courses"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link>
                     </template>
                 </b-table>
@@ -98,53 +76,113 @@
 import Header from '@/components/Header.vue'
 import SecondaryHeader from '@/components/SecondaryHeader.vue'
 import CoursesHeader from '../components/CoursesHeader.vue'
+import {mapActions, mapGetters} from 'vuex'
 export default {
-    name: 'Orders',
+    name: 'Bookings',
     components: {
         Header,
         SecondaryHeader,
         CoursesHeader
     },
+    computed: {
+        ...mapGetters(['getBookings'])
+    },
+    async created() {
+        this.loading = true
+        const resp = await this.fetchBookings()
+        if(resp) {
+            this.loading = false
+        }
+    },
+    watch: {
+        getBookings(val) {
+            if(val && val.length) {
+                this.bookings = this.getBookings
+                this.setExportData()
+            }
+        }
+    },
+  methods: {
+      ...mapActions(["fetchBookings"]),
+      setExportData() {
+          this.export_data = []
+          if(this.bookings && this.bookings.length) {
+            this.bookings.forEach(item => {
+                item.lesson = item.Lesson.name
+
+                if(item.corporateId) {
+                    item.candidate_type = "Corporate"
+                    item.corporate = item.CorporateMember.corporateName
+                }
+                else {
+                    item.candidate_type = "Student"
+                }
+
+                this.export_data.push(item)
+            })
+          }
+      }
+  },
     data() {
         return {
-         
-          view_able_orders:[
-            {
-              booking_id:'123456',
-              course_title:'某人用中文写的东西作为演示文字',
-              candidate_type:'Corporate',
-              payment:'Monthly',
-              invoice:'View',
-              lesson_date:'5-11-2020',
-              booking_date:'20-11-2020',
-              booked_by:'Client',
-              action:''
-            },
-            {
-              booking_id:'123456',
-              course_title:'某人用中文写的东西作为演示文字',
-              candidate_type:'Corporate',
-              payment:'Monthly',
-              invoice:'View',
-              lesson_date:'5-11-2020',
-              booking_date:'20-11-2020',
-              booked_by:'Client',
-              action:''
-            }
-          ],
-        
-         fields: [
-          // A regular column
-          'booking_id',
-          'course_title',
-          'candidate_type',
-          'payment',
-          'invoice',
-          'lesson_date',
-          'booking_date',
-          'booked_by',      
-          'action'
-        ],
+        loading: false,
+        bookings: [],
+        fields: [
+        {
+          key: "id",
+          label: "Booking ID",
+        },
+        {
+          key: "lesson",
+          label: "Lesson",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "bookedAs",
+          label: "Candidate Type",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: 'payment_type',
+          label: "Payment Type",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: 'bookingPrice',
+          label: "Price",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "createdAt",
+          label: "Booking Date"
+        },
+        {
+          key: "bookedBy",
+          label: "Booked By",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "action",
+          label: "Actions"
+        }
+      ],
+
+        export_fields: {
+            "Booking ID": "id",
+            "Lesson": "lesson",
+            "Candidate Type": "candidate_type",
+            "Corporate": "corporate",
+            "Payment": "payment_type",
+            "Price": "bookingPrice",
+            "Booking Date": "createdAt",
+            "Booked By": "bookedBy"
+        },
+        export_data: [],
 
         totalRows: 1,
         currentPage: 1,

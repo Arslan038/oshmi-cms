@@ -1,62 +1,62 @@
 <template>
   <div class="home">
     <Header msg="Welcome to Your Vue.js App" />
-    <SecondaryHeader title="Attendance" />
+    <SecondaryHeader  title="Attendance" />
     <b-container class="card bg-white mt-2 pb-5 pt-2">
       <CorporateHeader
         :create="false"
-        reroute="/corporate-attendance"
       />
 
-
-      <b-row class="mt-5">
-        <b-col md="2" cols="2" lg="2">
-          <h6 class="pt-2"><b>Corporate</b> </h6> 
+      <b-row class="mt-4">
+        <b-col md="3" class="text-left" cols="12">
+            <h6><b>Select Corporate</b></h6>
         </b-col>
-        <b-col cols="10" md="8" lg="6">
-          <div>
-            <select class="form-control rounded" >
-              <option value="" selected disabled>--Select Corporate--</option>
-            </select>
-          </div>
-          <!-- <div class="mt-3 d-flex">
-            <b-form-radio  name="some-radios" class="al-center" value="A"></b-form-radio>
-
-            <select class="form-control rounded " style="color:black !important" >
-              <option value="" selected disabled>Select Month</option>
-              <option value="January-2020">January-2020</option>
-              <option value="February-2020">February-2020</option>
-              <option value="March-2020">March-2020</option>
-              <option value="April-2020">April-2020</option>
-
-            </select>
-          </div>
-          <div class="mt-3 d-flex">
-            <b-form-radio v-model="selected" name="some-radios" value="B"></b-form-radio>
-
-            <input type="date" class="form-control rounded">
-          </div> -->
-        </b-col>
-      </b-row>
-      <b-row>
-        <b-col cols="2" md="2" lg="2">
-          <h6 class="pt-3"><b>Filter</b> </h6> 
-        </b-col>
-        <b-col cols="10" md="8" lg="6">
-          <div class="mt-3">
-            <select class="form-control rounded" >
-              <option value="" selected disabled>--Status-</option>
-            </select>
-          </div>
+        <b-col md="7" cols="12">
+            <multiselect v-model="search.corporate" :options="getCorporateMembers" :tagabled="true" :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Corporate" tag-placeholder="Select Corporate" label="corporateName" track-by="corporateName" :preselect-first="false">
+                <template slot="singleLabel" slot-scope="{ option }"><strong>{{ option.corporateName }}</strong></template>
+            </multiselect>
         </b-col>
       </b-row>
 
-      <div class="mt-2 text-md-left d-flex">
-        <div class="self-center">
+      <b-row class="mt-4">
+        <b-col md="3" class="text-left" cols="12">
+            <h6><b>Select Lesson</b></h6>
+        </b-col>
+        <b-col md="7" cols="12">
+            <multiselect v-model="search.lesson" :options="getLessons" :tagabled="true" :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Lesson" tag-placeholder="Select Lesson" :custom-label="lessonWithCourse" track-by="name" :preselect-first="false">
+                <template slot="singleLabel" slot-scope="{ option }"><strong>{{ option.name }}</strong> from Course <strong>  {{ option.course.name }}</strong></template>
+            </multiselect>
+        </b-col>
+      </b-row>
+
+      <b-row v-if="loading">
+          <b-col cols="12" class="text-center mt-3">
+              <b-spinner variant="purple"></b-spinner>
+              <p>Loading Attendance...</p>
+          </b-col>
+      </b-row>
+
+      <b-row v-if="!loading && search.lesson && search.corporate && !bookings.length">
+          <b-col cols="12" class="text-center mt-3">
+              <h5 class="text-purple">No Attendance Found</h5>
+          </b-col>
+      </b-row>
+
+      <div class="mt-2 text-md-left d-md-flex d-block d-lg-flex" v-if="!loading && bookings.length">
+        <div class="self-center text-left">
           Search
         </div>
         <div class="ml-3">
           <input class="border-hids form-control col-md-12" />
+        </div>
+        <div class="ml-2">
+          <select class="form-control rounded" v-model="filter">
+            <option :value="null" selected disabled>--Select--</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+
+          </select>
         </div>
         <div class="ml-auto">
           <b-button
@@ -69,47 +69,36 @@
         </div>
       </div>
 
-      <div class="mt-3">
-         <b-table bordered :responsive="true" :fields="fields" :items="members_data">
-          
-            <template v-slot:head(name)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(enrolled_course)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(month)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(status)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
-            <template v-slot:head(action)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
+      <div class="mt-3" v-if="!loading && bookings.length">
+         <b-table bordered :responsive="true" :fields="fields" :filter="filter" :items="bookings">
             <!-- Cells -->
-           
             <template v-slot:cell(name)="data">
-                <span class="smalls">{{data.item.name}} </span>
+                <span class="smalls">{{data.item.IndividualMember.firstName}} {{data.item.IndividualMember.lastName}} </span>
             </template>
-            <template v-slot:cell(enrolled_course)="data">
-                <span class="smalls">{{data.item.enrolled_course}}</span>
+            <template v-slot:cell(member_id)="data">
+                <span class="smalls">{{data.item.IndividualMember.id}}</span>
             </template>
-            <template v-slot:cell(month)="data">
-                <span class="smalls">{{data.item.month}}</span>
+            <template v-slot:cell(lesson_date)="data">
+                <span class="smalls">{{getDate(data.item.Lesson.startDate)}}</span>
+            </template>
+            <template v-slot:cell(lesson_time)="data">
+                <span class="smalls">{{data.item.Lesson.startTime}}</span>
+            </template>
+            <template v-slot:cell(payment_type)="data">
+                <span class="smalls">{{data.item.bookedAs == 'corporate' ? 'Monthy' : 'Offline'}}</span>
+            </template>
+            <template v-slot:cell(receipt)="">
+                <b-button size="sm" variant="outline-danger" class="rounds">
+                  Download Receipt
+                </b-button>
             </template>
             <template v-slot:cell(status)="data">
-               <b-button  variant="success" class="rounds">
-              {{data.item.status}}
-            </b-button>
-                <!-- <b-button  :variant="$route.name=='CorporateAttendance' ? 'danger':'outline-danger'" pill>{{data.item.status}}</b-button> -->
-
+                <b-button @click="update(data.item)" v-if="data.item.status=='pending'" size="sm" variant="outline-info" class="rounds">
+                  {{data.item.status}}
+                </b-button>
             </template>
-            <template v-slot:cell(action)="data">
+            <template v-slot:cell(action)="">
                <router-link to="/member-info"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link> 
-
             </template>
         </b-table>
 
@@ -125,6 +114,28 @@
       </div>
     </b-container>
 
+    <!-- Update Booking -->
+    
+    <b-modal title="Update Status" v-model="updateModal" hide-footer>
+      <b-form @submit.prevent v-if="bookingToEdit">
+        <b-row>
+          <b-col v-if="updating" cols="12">
+            <b-alert variant="info" show>Please wait. We are Updating Status...</b-alert>
+          </b-col>
+          <b-col cols="12">
+              <b-form-group>
+                <label for="status"><strong>Select Status</strong></label>
+                <b-form-select v-model="bookingToEdit.status" @change="updateStatus" required>
+                  <b-form-select-option value="pending">Pending</b-form-select-option>
+                  <b-form-select-option value="finished">Finished</b-form-select-option>
+                  <b-form-select-option value="failed">Failed</b-form-select-option>
+                  <b-form-select-option value="absent">Absent</b-form-select-option>
+                </b-form-select>
+              </b-form-group>
+          </b-col>
+        </b-row>
+      </b-form>
+    </b-modal>
   </div>
 </template>
 
@@ -132,50 +143,122 @@
 // @ is an alias to /src
 import Header from "@/components/Header.vue";
 import SecondaryHeader from "@/components/SecondaryHeader.vue";
-
 import CorporateHeader from "../components/CorporateHeader.vue";
+import {mapActions, mapGetters} from 'vuex'
+import Multiselect from 'vue-multiselect';
 export default {
-  name: "Orders",
+  name: "Attendance",
   components: {
     Header,
     SecondaryHeader,
     CorporateHeader,
+    Multiselect
+  },
+  computed: {
+    ...mapGetters(['getLessons', 'getBookings', 'getCorporateMembers'])
+  },
+  methods: {
+    ...mapActions(["fetchLessons", "fetchBookings", "fetchCorporateMembers", "updateBooking"]),
+    lessonWithCourse({ name, course }) {
+      return `${name} — ${course.name}`
+    },
+    update(item) {
+      this.bookingToEdit = Object.assign({}, item)
+      this.updateModal = true
+    },
+    async updateStatus() {
+      this.updating = true
+      const resp = await this.updateBooking(this.bookingToEdit)
+      this.updating = false
+      if(resp == 1) {
+        this.updateModal = false
+      }
+    }
+  },
+  async created() {
+    if(!this.getLessons.length) {
+      await this.fetchLessons()
+    }
+    if(!this.getCorporateMembers.length) {
+      await this.fetchCorporateMembers()
+    }
+  },
+  watch: {
+    getBookings(val) {
+      if(val) {
+        this.bookings = val.filter(booking => booking.Lesson.id == this.search.lesson.id && booking.corporateId == this.search.corporate.id)
+      }
+    },
+    search: {
+      deep: true,
+      async handler(val) {
+        if(val) {
+          if(val.lesson && val.corporate) {
+            this.loading = true
+            await this.fetchBookings()
+            this.loading = false
+          }
+        }
+      }  
+    }
   },
   data() {
     return {
-      members_data: [
-
-      {
-            name:'Gammon Ltd',
-            enrolled_course:'3',
-            month:'June',
-            status:'Finished',
-            action:''
- 
-
+      loading: false,
+      bookingToEdit: null,
+      updateModal: false,
+      updating: false,
+      search: {
+        lesson: null,
+        corporate: null
+      },
+      corporate: null,
+      bookings: [],
+      fields: [
+        {
+          key: "name",
+          label: "Name",
+          sortable: true,
+          sortByFormatted: true,
         },
         {
-         
-         
-            name:'Gammon Ltd',
-            enrolled_course:'3',
-            month:'June',
-            status:'Finished',
-            action:''
-
+          key: "member_id",
+          label: "Member ID",
         },
+        {
+          key: "lesson_date",
+          label: "Lesson Date",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "lesson_time",
+          label: "Lesson Time",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "payment_type",
+          label: "Payment Type",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "status",
+          label: "Status",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "receipt",
+          label: "Receipt",
+        },
+        {
+          key: "action",
+          label: "Action",
+        }
       ],
-
-     
-      fields: [
-        // A regular column
-        "name",
-        "enrolled_course",
-        "month",
-        "status",
-        "action",
-      ],
-
+      filter: null,
       totalRows: 1,
       currentPage: 1,
       perPage: 10,

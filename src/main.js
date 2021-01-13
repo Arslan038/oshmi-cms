@@ -13,16 +13,13 @@ import 'ant-design-vue/dist/antd.css';
 import FullCalendar from 'vue-full-calendar'
 import "fullcalendar/dist/fullcalendar.min.css";
 
-
-
 import { Upload,Icon   } from 'ant-design-vue';
-
-import JsonCSV from 'vue-json-csv'
+import JsonExcel from "vue-json-excel";
 import store from './store'
 
-
-Vue.component('downloadCsv', JsonCSV)
 Vue.config.productionTip = false
+
+Vue.component("downloadExcel", JsonExcel);
 Vue.use(BootstrapVue)
 Vue.use(Upload);
 Vue.use(Icon);

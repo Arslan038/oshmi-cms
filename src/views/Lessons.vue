@@ -221,6 +221,7 @@ export default {
 
                     lessonArray.push(item)
                 })
+                lessonArray = lessonArray.sort((a,b) => a.endDate - a.startDate)
                 this.lessons = lessonArray
             }
         },

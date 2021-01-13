@@ -19,6 +19,9 @@ export default {
                 this.$router.push({path: to})
             }
         },
+        getMonths() {
+            return ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        },
         getDate(date) {
             let customDate = date.split('T')[0]
             customDate = customDate.split('-')

@@ -29,7 +29,9 @@
                     <input class="border-hids form-control col-md-12" type="search" v-model="filter" />
                 </div>
                 <div class="ml-auto">
-                    <b-button variant="info" class="pr-3 pl-3" pill>Export</b-button>
+                    <download-excel :data="export_data" :export-fields="export_fields" name="Courses" worksheet="Courses">
+                        <b-button variant="info" class="pr-3 pl-3" pill>Export</b-button>    
+                    </download-excel>
                 </div>
             </div>
 
@@ -57,7 +59,7 @@
                         </span> -->
                     </template>
                     <template v-slot:cell(actions)="data">
-                        <i class="fas fa-copy text-primary"></i>
+                        <i class="fas fa-copy text-primary" @click="openExportModal(data.item)"></i>
                         <i @click="$router.push('/edit-course/'+data.item.id)" class="ml-2 mr-2 text-info fas fa-pencil-alt"></i>
                         <i @click="removeCourse(data.item)" class="fas fa-trash text-danger"></i>
                     </template>
@@ -206,6 +208,39 @@
             </b-container>
         </b-modal>
 
+        <!-- Export Courses By Month -->
+
+        <b-modal title="Export Course Lessons" v-model="exportModal" hide-footer>
+            <b-form @submit.prevent v-if="courseToExport && courseToExport.Lessons.length">
+                <b-row>
+                    <b-col cols="12" class="text-center">
+                        <p><strong class="text-purple">Export Lessons of {{ courseToExport.name }}</strong></p>
+                    </b-col>
+                    <b-col cols="12">
+                        <b-form-group>
+                            <label><strong>Select Month*</strong></label>
+                            <b-form-select @change="setLessonExportData" v-model="month" required>
+                                <b-form-select-option :value="null">Select Month</b-form-select-option>
+                                <b-form-select-option v-for="(month, index) in getMonths()" :key="index" :value="index+1">{{month}}</b-form-select-option>
+                            </b-form-select>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" class="text-center" v-if="month && export_lessons.length">
+                        <download-excel :data="export_lessons" :export-fields="export_lesson_fields" name="Course Lessons" worksheet="Course Lessons">
+                            <b-button type="submit" variant="info" class="pr-3 pl-3" pill>Export Lessons</b-button>    
+                        </download-excel>
+                    </b-col>
+                </b-row>
+            </b-form>
+            <b-row v-if="courseToExport && !courseToExport.Lessons.length">
+                <b-col cols="12" class="text-center">
+                    <p>
+                        <strong>This Course has No Lessons.</strong>
+                    </p>
+                </b-col>
+            </b-row>
+        </b-modal>
+
         <!-- Add New Lesson Modal -->
 
         <b-modal title="Add Lesson" v-model="addLessonModal" hide-footer hide-header-close no-close-on-backdrop centered>
@@ -278,7 +313,7 @@ export default {
         Multiselect
     },
     computed: {
-        ...mapGetters(['getCourses', 'getTutors', 'getCourseLessons', 'getTutors']),
+        ...mapGetters(['getCourses', 'getCategories', 'getCourseLessons', 'getTutors']),
         courseList() {
             const items = this.courses
             if(items) {
@@ -296,7 +331,7 @@ export default {
         },
     },
     methods: {
-        ...mapActions(["fetchCourses", "fetchTutors", "deleteCourse", "fetchCourseLessons", "deleteLesson", "createLesson"]),
+        ...mapActions(["fetchCourses", "fetchCategories", "fetchTutors", "deleteCourse", "fetchCourseLessons", "deleteLesson", "createLesson"]),
         removeCourse(item) {
             this.courseToDelete = Object.assign({}, item)
             this.deleteModal = true
@@ -383,25 +418,94 @@ export default {
                 this.addLessonModal = false
                 this.lessonModal = false
             }
-        }
+        },
+        openExportModal(course) {
+            this.courseToExport = Object.assign({}, course)
+            this.month = null
+            this.exportModal = true
+        },
+        async setLessonExportData(value) {
+            if(this.courseToExport.Lessons.length) {
+                this.export_lessons = []
+                await this.courseToExport.Lessons.forEach(async lesson => {
+                    if(lesson) {
+                        const lessonMonth = lesson.startDate.split('T')[0].split('-')[1]
+                        if(lessonMonth == value) {
+                            this.export_lessons.push(lesson)
+                        }
+                    }
+                })
+                if(this.export_lessons.length < 1) {
+                    this.toast({title: "Export Course Lessons", message:"No Lessons Found for selected Month", type: "danger"})
+                }
+            }
+        },
+        async setExportData() {
+            let categories = []
+            let tutors = []
+            let files = []
+
+            if(this.courses && this.courses.length) {
+                await this.courses.forEach(async course => {
+                    if(course.isDeleted) {
+                        course.active = "Deleted"
+                    }
+                    else {
+                        course.active = "Active"
+                    }
+                    if(course && course.CourseFiles.length) {
+                        await course.CourseFiles.forEach(item => {
+                            files.push(item.path)
+                        })
+                    }
+
+                    course.course_files = files.toString()
+
+                    if(course && course.courseCategories.length) {
+                        await course.courseCategories.forEach(item => {
+                            categories.push(item.name)
+                        })
+                    }
+                    course.categories = categories.toString()
+                    if(course && course.CourseTutors.length) {
+                        await course.CourseTutors.forEach(item => {
+                            const tutor = this.getTutors.find(tutor => tutor.id == item.tutorId)
+                            if(tutor) {
+                                tutors.push(tutor.name)
+                            }
+                        })
+                        course.tutors = tutors.toString()
+                    }
+                })
+            }
+            
+            this.export_data = this.courses
+            // delete this.export_data.CourseTutors
+            // delete this.export_data.courseCategories
+        },
     },
 
     async created() {
+        this.loading = true
+        if(!this.getTutors.length) {
+            await this.fetchTutors()
+        }
         if(!this.getCourses.length) {
-            this.loading = true
+            
             const resp = await this.fetchCourses()
-            if(resp) {
-                this.loading = false
-            }
+            
         }
         else {
             this.courses = this.getCourses
+            await this.setExportData()
         }
+        this.loading = false
     },
     watch: {
         getCourses(val) {
             if(val) {
                 this.courses = this.getCourses
+                this.setExportData()
             }
         },
         getCourseLessons(val) {
@@ -412,6 +516,9 @@ export default {
     },
     data() {
         return {
+            month: null,
+            exportModal: false,
+            courseToExport: null,
             filter: null,
             totalRows: 1,
             currentPage: 1,
@@ -474,6 +581,35 @@ export default {
                     key: 'actions'
                 }
             ],
+            export_lesson_fields: {
+                "Lesson ID": "id",
+                "Lesson Code": "lessonCode",
+                "Lesson Name": "name",
+                "Course ID": "courseId",
+                "Start Date": "startDate",
+                "Start Time": "startTime",
+                "End Date": "endDate",
+                "End Time": "endTime"
+
+            },
+            export_lessons: [],
+            export_fields: {
+                "Course ID": "id",
+                "Course Name": "name",
+                "Course Code": "courseCode",
+                "Description": "description",
+                "Address": "address",
+                "Price": "price",
+                "Class Size": "availableSeats",
+                "Course Nature": "courseNature",
+                "Certificate Effective Period": "certEffectivePeriod",
+                "Tutor": "tutors",
+                "Category": "categories",
+                "Image": "picture",
+                "Files": "course_files",
+                "Status": "active"
+            },
+            export_data: [],
             lessonFields: [
                 {
                     key: "name",

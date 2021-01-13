@@ -41,8 +41,8 @@ const actions = {
         try {
             commit('setCorporateMembers', [])
             const resp = await CorporateRepository.fetchCorporateMembers();
-            if(resp.data.success) {
-                commit('setCorporateMembers', resp.data.members)
+            if(resp.data && resp.data.length) {
+                commit('setCorporateMembers', resp.data)
                 return 1
             }
             else {
@@ -98,7 +98,14 @@ const actions = {
 }
 
 const mutations = {
-    setCorporateMembers: (state, payload) => state.corporate_members = payload,
+    setCorporateMembers: (state, payload) => {
+        let membersArray = []
+        payload.forEach(item => {
+            membersArray.push(item.corporateData)
+        })
+
+        state.corporate_members = membersArray
+    },
     setCorporateMember: (state, payload) => state.corporate_member = payload,
     addCorporateMember: (state, payload) => state.corporate_members.push(payload),
     updateCorporateMember: (state, payload) => {

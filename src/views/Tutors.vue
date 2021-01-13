@@ -36,6 +36,9 @@
 
             <div class="mt-3" v-if="!loading && tutors.length">
                 <b-table :responsive="true" striped hover :fields="fields" :items="tutorList" :filter="filter">
+                    <template v-slot:cell(courseCount)="data">
+                        {{data.item.courseCount ? data.item.courseCount : 0}}
+                    </template>
                     <template v-slot:cell(actions)="data">
                         <i @click="$router.push('/edit-tutor/'+data.item.id)" class="ml-2 mr-2 text-info fas fa-pencil-alt"></i>
                         <i @click="removeTutor(data.item)" class="fas fa-trash text-danger"></i>

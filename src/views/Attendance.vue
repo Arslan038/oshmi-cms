@@ -9,26 +9,43 @@
       />
 
       <b-row class="mt-4">
-        <b-col md="1" class="text-left al-center">
-         <h6><b>Courses</b> </h6> 
+        <b-col md="3" class="text-left" cols="12">
+            <h6><b>Select Lesson</b></h6>
         </b-col>
-        <b-col md="8">
-          <select class="form-control rounded">
-            <option value="">Select course and date</option>
-          </select>
+        <b-col md="7" cols="12">
+            <multiselect v-model="lesson" :options="getLessons" :tagabled="true" :multiple="false" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Lesson" tag-placeholder="Select Lesson" :custom-label="lessonWithCourse" track-by="name" :preselect-first="false">
+                <template slot="singleLabel" slot-scope="{ option }"><strong>{{ option.name }}</strong> from Course <strong>  {{ option.course.name }}</strong></template>
+            </multiselect>
         </b-col>
       </b-row>
 
-      <div class="mt-2 text-md-left d-md-flex d-block d-lg-flex">
+      <b-row v-if="loading">
+          <b-col cols="12" class="text-center mt-3">
+              <b-spinner variant="purple"></b-spinner>
+              <p>Loading Attendance...</p>
+          </b-col>
+      </b-row>
+
+      <b-row v-if="!loading && lesson && !bookings.length">
+          <b-col cols="12" class="text-center mt-3">
+              <h5 class="text-purple">No Attendance Found</h5>
+          </b-col>
+      </b-row>
+
+      <div class="mt-2 text-md-left d-md-flex d-block d-lg-flex" v-if="!loading && bookings.length">
         <div class="self-center text-left">
           Search
         </div>
         <div class="ml-3">
           <input class="border-hids form-control col-md-12" />
         </div>
-        <div>
-          <select class="form-control rounded">
-            <option value="" selected disabled>--Select--</option>
+        <div class="ml-2">
+          <select class="form-control rounded" v-model="filter">
+            <option :value="null" selected disabled>--Select--</option>
+            <option value="pending">Pending</option>
+            <option value="completed">Completed</option>
+            <option value="failed">Failed</option>
+
           </select>
         </div>
         <div class="ml-auto">
@@ -42,61 +59,35 @@
         </div>
       </div>
 
-      <div class="mt-3">
-         <b-table bordered :responsive="true" :fields="fields" :items="members_data">
-            <template v-slot:head(name)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(member_id)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(course_date)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-            <template v-slot:head(course_time)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
-            <template v-slot:head(payment_type)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
-            <template v-slot:head(status)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-             <template v-slot:head(action)="data">
-                <span class="smalls">{{ data.label }}</span>
-            </template>
-
-
+      <div class="mt-3" v-if="!loading && bookings.length">
+         <b-table bordered :responsive="true" :fields="fields" :filter="filter" :items="bookings">
             <!-- Cells -->
             <template v-slot:cell(name)="data">
-                <span class="smalls">{{data.item.name}} </span>
+                <span class="smalls">{{data.item.IndividualMember.firstName}} {{data.item.IndividualMember.lastName}} </span>
             </template>
             <template v-slot:cell(member_id)="data">
-                <span class="smalls">{{data.item.member_id}}</span>
+                <span class="smalls">{{data.item.IndividualMember.id}}</span>
             </template>
-            <template v-slot:cell(course_date)="data">
-                <span class="smalls">{{data.item.course_date}}</span>
+            <template v-slot:cell(lesson_date)="data">
+                <span class="smalls">{{getDate(data.item.Lesson.startDate)}}</span>
             </template>
-            <template v-slot:cell(course_time)="data">
-                <span class="smalls">{{data.item.course_time}}</span>
+            <template v-slot:cell(lesson_time)="data">
+                <span class="smalls">{{data.item.Lesson.startTime}}</span>
             </template>
             <template v-slot:cell(payment_type)="data">
-                <span class="smalls">{{data.item.payment_type}} </span>
+                <span class="smalls">{{data.item.bookedAs == 'corporate' ? 'Monthy' : 'Offline'}}</span>
+            </template>
+            <template v-slot:cell(receipt)="">
+                <b-button size="sm" variant="outline-danger" class="rounds">
+                  Download Receipt
+                </b-button>
             </template>
             <template v-slot:cell(status)="data">
-                <b-button v-if="data.item.status=='Finished'" variant="success" class="rounds">
-                  {{data.item.status}}
-                </b-button>
-                <b-button v-else-if="data.item.status=='Absent'" variant="outline-success" class="rounds">
-                  {{data.item.status}}
-                </b-button>
-                <b-button v-else-if="data.item.status=='Failed'" variant="warning" class="rounds">
+                <b-button @click="update(data.item)" v-if="data.item.status=='pending'" size="sm" variant="outline-info" class="rounds">
                   {{data.item.status}}
                 </b-button>
             </template>
-            <template v-slot:cell(action)="data">
+            <template v-slot:cell(action)="">
                <router-link to="/member-info"><i class="ml-2 mr-2 text-info fas fa-pencil-alt"></i></router-link> 
             </template>
         </b-table>
@@ -112,7 +103,29 @@
         </div>
       </div>
     </b-container>
+    
+    <!-- Update Booking -->
 
+    <b-modal title="Update Status" v-model="updateModal" hide-footer>
+      <b-form @submit.prevent v-if="bookingToEdit">
+        <b-row>
+          <b-col v-if="updating" cols="12">
+            <b-alert variant="info" show>Please wait. We are Updating Status...</b-alert>
+          </b-col>
+          <b-col cols="12">
+              <b-form-group>
+                <label for="status"><strong>Select Status</strong></label>
+                <b-form-select v-model="bookingToEdit.status" @change="updateStatus" required>
+                  <b-form-select-option value="pending">Pending</b-form-select-option>
+                  <b-form-select-option value="finished">Finished</b-form-select-option>
+                  <b-form-select-option value="failed">Failed</b-form-select-option>
+                  <b-form-select-option value="absent">Absent</b-form-select-option>
+                </b-form-select>
+              </b-form-group>
+          </b-col>
+        </b-row>
+      </b-form>
+    </b-modal>
   </div>
 </template>
 
@@ -120,65 +133,110 @@
 // @ is an alias to /src
 import Header from "@/components/Header.vue";
 import SecondaryHeader from "@/components/SecondaryHeader.vue";
-
 import CorporateHeader from "../components/CorporateHeader.vue";
+import {mapActions, mapGetters} from 'vuex'
+import Multiselect from 'vue-multiselect';
 export default {
-  name: "Orders",
+  name: "Attendance",
   components: {
     Header,
     SecondaryHeader,
     CorporateHeader,
+    Multiselect
+  },
+  computed: {
+    ...mapGetters(['getLessons', 'getBookings'])
+  },
+  methods: {
+    ...mapActions(["fetchLessons", "fetchBookings", "updateBooking"]),
+    lessonWithCourse({ name, course }) {
+      return `${name} — ${course.name}`
+    },
+    update(item) {
+      this.bookingToEdit = Object.assign({}, item)
+      this.updateModal = true
+    },
+    async updateStatus() {
+      this.updating = true
+      const resp = await this.updateBooking(this.bookingToEdit)
+      this.updating = false
+      if(resp == 1) {
+        this.updateModal = false
+      }
+    }
+  },
+  created() {
+    if(!this.getLessons.length) {
+      this.fetchLessons()
+    }
+  },
+  watch: {
+    getBookings(val) {
+      if(val) {
+        this.bookings = val.filter(booking => booking.Lesson.id == this.lesson.id)
+      }
+    },
+    async lesson(val) {
+      if(val) {
+        this.loading = true
+        await this.fetchBookings()
+        this.loading = false
+      }
+    }
   },
   data() {
     return {
-      members_data: [
-
-        {
-             name:'Chai Tai',
-            member_id:'85274185',
-            course_date:'24-6=2020',
-            course_time:'12:00',
-            payment_type:'Offline',
-            status:'Finished',
-            action:''
-
- 
-
-        },
-        {
-          
-             name:'Chai Tai',
-            member_id:'85274185',
-            course_date:'24-6=2020',
-            course_time:'12:00',
-            payment_type:'Offline',
-            status:'Failed',
-            action:''
-        },
-        {
-          
-             name:'Chai Tai',
-            member_id:'85274185',
-            course_date:'24-6=2020',
-            course_time:'12:00',
-            payment_type:'Offline',
-            status:'Absent',
-            action:''
-        },
-      ],
-
-     
+      loading: false,
+      lesson: null,
+      bookingToEdit: null,
+      updateModal: false,
+      updating: false,
+      bookings: [],
       fields: [
-        // A regular column
-        "name",
-        "member_id",
-        "course_date",
-        "course_time",
-        "payment_type",
-        "status",
-        "action",
+        {
+          key: "name",
+          label: "Name",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "member_id",
+          label: "Member ID",
+        },
+        {
+          key: "lesson_date",
+          label: "Lesson Date",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "lesson_time",
+          label: "Lesson Time",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "payment_type",
+          label: "Payment Type",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "status",
+          label: "Status",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "receipt",
+          label: "Receipt",
+        },
+        {
+          key: "action",
+          label: "Action",
+        }
       ],
-
+      filter: null,
       totalRows: 1,
       currentPage: 1,
       perPage: 10,

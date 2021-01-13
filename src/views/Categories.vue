@@ -6,14 +6,14 @@
             <CoursesHeader :create="false" addtext="Add Booking" reroute="/add-booking" />
             
             <b-row v-if="loading">
-                <b-col cols="12" class="text-center">
+                <b-col cols="12" class="text-center mt-3">
                     <b-spinner variant="purple"></b-spinner>
                     <p>Loading Categories</p>
                 </b-col>
             </b-row>
 
             <b-row v-if="!loading && !categories.length">
-                <b-col cols="12" class="text-center">
+                <b-col cols="12" class="text-center mt-3">
                     <h5 class="text-purple">No Category Found</h5>
                 </b-col>
             </b-row>
@@ -46,7 +46,7 @@
                             <span class="smalls">{{data.item.name}} </span>
                         </template>
                         <template v-slot:cell(no_course)="data">
-                            <span class="smalls">{{countCourses(data.item.categoryCourses)}}</span>
+                            <span class="smalls">{{data.item.categoryCourses ? countCourses(data.item.categoryCourses) : 0}}</span>
                         </template>
                         <template v-slot:cell(action)="data">
                             <span @click="editCategory(data.item)" class="mr-2 text-primary"><i class="fas fa-pencil-alt"></i></span>
