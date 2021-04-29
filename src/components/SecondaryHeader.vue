@@ -13,19 +13,19 @@
             </b-breadcrumb>
            </div>
          </b-col>
-         <b-col md="2" style="position:relative">
+         <!-- <b-col md="2" style="position:relative">
            <div style="margin-top:-30px; !important">
               <apexchart type="bar" height="100" :options="chartOptions" :series="series"></apexchart>
           </div>
           <div class="page-text">Page Views</div>
-         </b-col>
-          <b-col md="2" style="position:relative">
+         </b-col> -->
+          <!-- <b-col md="2" style="position:relative">
             <div style="margin-top:-30px; !important">
                    <apexchart type="bar" height="100" :options="secchartOptions" :series="series"></apexchart>
             </div>
             <div class="visitor-text">Visitors</div>
 
-         </b-col>
+         </b-col> -->
       </b-row>
     </b-container>
   </div>

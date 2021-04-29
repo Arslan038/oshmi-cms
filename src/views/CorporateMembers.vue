@@ -9,7 +9,7 @@
         reroute="/add-corporate"
       />
       <div class="mt-4 text-left text-primary">
-        <h4 class="text-purple">Corporate Members</h4>
+        <h4 class="text-green">Corporate Members</h4>
       </div>
 
       <b-row v-if="loading">
@@ -21,7 +21,7 @@
 
       <b-row v-if="!loading && !members.length">
         <b-col cols="12" class="text-center">
-            <h5 class="text-purple">No Corporate Member Found</h5>
+            <h5 class="text-green">No Corporate Member Found</h5>
         </b-col>
       </b-row>
 
@@ -52,10 +52,10 @@
                 <span class="smalls">-{{data.item.discountValue}} HKD</span>
             </template>
             <template v-slot:cell(discountEndDate)="data">
-                <span class="smalls">{{getDate(data.item.discountEndDate)}}</span>
+                <span class="smalls" v-if="data.item.discountEndDate">{{getDate(data.item.discountEndDate)}}</span>
             </template>
             <template v-slot:cell(balance)="data">
-                <strong v-if="data.item.bookings.length" @click="openSettleModal(data.item)" class="link text-purple">{{calculateBalance(data.item.bookings)}}</strong>
+                <strong v-if="data.item.bookings && data.item.bookings.length > 0" @click="openSettleModal(data.item)" class="link text-green">{{calculateBalance(data.item.bookings)}}</strong>
                 <span v-else>0 HKD</span>
             </template>
             
@@ -98,8 +98,8 @@
       </b-table-simple>
       <b-row>
         <b-col cols="12" class="text-center">
-          <p><strong>Total Sum: <span class="text-purple">{{totalPrice}} HKD</span></strong></p>
-          <b-button variant="danger">Settle Payment</b-button>
+          <p><strong>Total Sum: <span class="text-green">{{totalPrice}} HKD</span></strong></p>
+          <b-button variant="danger mt-3" v-if="itemsToSettle.data.length" @click="settlePaymentNow" :disabled="settleLoading">{{settleLoading ? 'Please wait...' : 'Settle Payment'}}</b-button>
         </b-col>
       </b-row>
     </b-modal>
@@ -129,26 +129,40 @@ export default {
     },
   },
   async created() {
-    if(!this.getCorporateMembers.length) {
-      this.loading = true
-      const resp = await this.fetchCorporateMembers()
-      if(resp) {
-        this.loading = false
-      }
-    }
-    else {
-      this.members = this.getCorporateMembers
-    }
+    await this.init()
   },
   watch: {
     getCorporateMembers(val) {
       if(val && val.length) {
-        this.members = this.getCorporateMembers
+        this.setMembersData()
+        // this.members = this.getCorporateMembers
       }
     }
   },
   methods: {
-    ...mapActions(["fetchCorporateMembers"]),
+    ...mapActions(["fetchCorporateMembers", "settleCorporatePayment"]),
+    async setMembersData() {
+      if(this.getCorporateMembers.length) {
+        this.members = []
+        
+        await this.getCorporateMembers.forEach(member => {
+          if(member.bookings && member.bookings.length > 0) {
+            let combinedBookings = []
+            member.bookings.forEach(item => {
+              let booking = combinedBookings.find(b => b.month == item.month && b.year == item.year)
+              if(booking) {
+                booking.price = Number(booking.price) + Number(item.price)
+              }
+              else {
+                combinedBookings.push(item)
+              }
+              member.bookings = combinedBookings
+            })
+          }
+          this.members.push(member)
+        })
+      }
+    },
     openSettleModal(data) {
       this.itemsToSettle.corporateId = data.id
       this.itemsToSettle.data = []
@@ -164,7 +178,6 @@ export default {
       }
       this.totalPrice = 0
       await this.itemsToSettle.data.forEach(data => {
-        console.log(data)
         this.totalPrice = Number(this.totalPrice) + Number(data.price)
       })
       console.log(this.totalPrice)
@@ -185,9 +198,30 @@ export default {
       }
       return balance + " HKD"
     },
+
+    async settlePaymentNow() {
+      let payload = Object.assign({}, this.itemsToSettle)
+      payload.dates = payload.data
+      delete payload.data
+
+      this.settleLoading = true
+      const resp = await this.settleCorporatePayment(payload)
+      this.settleLoading = false
+      if(resp == 1) {
+        this.settleModal = false
+        this.init()
+      }
+    },
+
+    async init() {
+      this.loading = true
+      await this.fetchCorporateMembers()
+      this.loading = false
+    }
   },
   data() {
     return {
+      settleLoading: false,
       members: [],
       loading: false,
       settleModal: false,

@@ -12,7 +12,7 @@
             <b-form @submit.prevent="submitCourse" v-if="course && !loading">
                 <b-row>
                     <b-col class="mt-2 text-left text-primary">
-                        <h4 class="text-purple">Edit Course</h4>
+                        <h4 class="text-green">Edit Course</h4>
                     </b-col>
                     <b-col class="mt-2 text-right">
                         <b-button variant="danger" class="float-right pr-3 pl-3" type="submit" pill :disabled="updateLoading">{{updateLoading ? 'Updating Course...' : 'Save'}}</b-button>
@@ -65,14 +65,14 @@
                     </b-col>
                 </b-row>
 
-                <b-row class="mt-2">
+                <!-- <b-row class="mt-2">
                     <b-col md="2" class="text-left">
                         <b>Address</b>
                     </b-col>
                     <b-col md="10" class="text-left">
                         <b-form-input placeholder="Address" class="rounded" required v-model="course.address"></b-form-input>
                     </b-col>
-                </b-row>
+                </b-row> -->
                 <b-row class="mt-2">
                     <b-col md="2" class="text-left">
                         <b>Course Price</b>
@@ -82,14 +82,14 @@
                     </b-col>
                 </b-row>
 
-                <b-row class="mt-2">
+                <!-- <b-row class="mt-2">
                     <b-col md="2" class="text-left">
                         <b>Available Seats</b>
                     </b-col>
                     <b-col md="10" class="text-left">
                         <b-form-input placeholder="Available Seats" type="number" class="rounded" required v-model="course.availableSeats"></b-form-input>
                     </b-col>
-                </b-row>
+                </b-row> -->
 
                 <b-row class="mt-2">
                     <b-col md="2" class="text-left">
@@ -102,16 +102,16 @@
                     </b-col>
                 </b-row>
 
-                <b-row class="mt-2">
+                <!-- <b-row class="mt-2">
                     <b-col md="2" class="text-left">
                         <b>Cert Effective Period</b>
                     </b-col>
                     <b-col md="10" class="text-left">
                         <b-form-checkbox button-variant="purple" v-model="is_cert">Does this course has Cert Effective Period ? ?</b-form-checkbox>
                     </b-col>
-                </b-row>
+                </b-row> -->
 
-                <b-row class="mt-2" v-if="is_cert">
+                <!-- <b-row class="mt-2" v-if="is_cert">
                     <b-col md="10" class="offset-md-2">
                         <b-form-select class="rounded" v-model="course.certEffectivePeriod" required>
                             <b-form-select-option :value="null">-- Select Cer Effective Period</b-form-select-option>
@@ -122,14 +122,14 @@
                             <b-form-select-option value="5 Year">5 Year</b-form-select-option>
                         </b-form-select>
                     </b-col>
-                </b-row>
+                </b-row> -->
 
                 <b-row class="mt-3">
                     <b-col md="2" class="text-left" cols="12">
                         <b>Course Description</b>
                     </b-col>
-                    <b-col md="10" cols="12">
-                        <vue-editor v-model="course.description" placeholder="Enter Course Description"></vue-editor>
+                    <b-col md="10" cols="12" class="text-left">
+                        <vue-editor v-model="course.description" :editor-toolbar="customToolbar" placeholder="Enter Course Description"></vue-editor>
                     </b-col>
                 </b-row>
 
@@ -179,15 +179,15 @@
                             />
                         </div>
                         <!-- <div class="d-flex justify-content-between mt-2" v-for="(file, index) in course.files" :key="index">
-                            <strong class="text-purple">{{file.name}}</strong>
+                            <strong class="text-green">{{file.name}}</strong>
                             <i @click="removeFile(index)" class="fa fa-times-circle"></i>
                         </div> -->
                         <div class="d-flex justify-content-between mt-2" v-for="(file, index) in oldFiles" :key="file.id">
-                            <strong class="text-purple">{{file.name}}.{{file.extension}}</strong>
+                            <strong class="text-green">{{file.name}}.{{file.extension}}</strong>
                             <i @click="removeFile(file,index)" class="fa fa-times-circle"></i>
                         </div>
                         <div class="d-flex justify-content-between mt-2" v-for="(file, index) in newUploads" :key="index">
-                            <strong class="text-purple">{{file.name}}</strong>
+                            <strong class="text-green">{{file.name}}</strong>
                             <i @click="removeUploadedFile(index)" class="fa fa-times-circle"></i>
                         </div>
                     </b-col>
@@ -490,7 +490,7 @@ export default {
             loading: false,
             updateLoading: false,
             errors: [],
-            courseNatures: ['License Renewal', 'New Course'],
+            courseNatures: ['License Renewal', 'New Course', "Other"],
             course: null,
             breadcrumb: [
                 {

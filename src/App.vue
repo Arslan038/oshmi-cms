@@ -77,7 +77,7 @@ body {
   background-color:#f1f4f3 !important
 }
 .bg-header{
-  background-color:#191f28 !important
+  background-color: #f9f9f9 !important
 }
 .text-orange{
   color:#c36928 !important
@@ -117,15 +117,15 @@ td {
 }
 .btn-outline-secondary:hover{
   color:white !important;
-  background:#a37be5 !important;
-  border-color:#a37be5 !important;
+  background:#008001 !important;
+  border-color:#008001 !important;
 }
 .btn-danger{
-  background:#a37be5 !important;
-  border-color:#a37be5 !important;
+  background:#008001 !important;
+  border-color:#008001 !important;
 }
 .btn-danger:hover{
-  background:#a37be5 !important;
+  background:#008001 !important;
   color:white !important;
 }
 .btn-success{
@@ -156,18 +156,19 @@ td {
   color:white !important;
 }
 .btn-outline-danger {
-    color: #a37be5 !important;
-    border-color: #a37be5 !important;
+    color: #008001 !important;
+    border-color: #008001 !important;
 }
 .btn-outline-danger:hover {
-    background: #a37be5 !important;
+    background: #008001 !important;
     color:white !important;
 }
 .router-link-active{
-  color:#a37be5 !important;
+  color:#7ed321 !important;
+  font-weight: bold;
 }
-.text-purple{
-  color:#a37be5 !important;
+.text-green{
+  color:#008001 !important;
 }
 .al-center{
   align-self:center;
@@ -199,5 +200,17 @@ td {
 
 .link:hover {
   cursor: pointer;
+}
+
+.btn-danger, .btn-outline-danger, .btn-danger:focus, .btn-outline-danger:focus {
+  outline: none !important;
+}
+
+label.custom-control-label {
+  width: 100% !important;
+  border-radius: 20px;
+  padding: 7px 10px;
+  margin-top: 10px;
+  border: 1px solid #ddd !important;
 }
 </style>

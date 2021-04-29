@@ -4,7 +4,7 @@
     <SecondaryHeader title="Edit Individual Member" :breadcrumb="breadcrumb" />
     <b-container class="card bg-white mt-2 pb-5 pt-2">
         <div class="mt-2 text-left text-primary">
-            <h4 class="text-purple">Edit Member</h4>
+            <h4 class="text-green">Edit Member</h4>
         </div>
         <b-row v-if="loading">
             <b-col cols="12">
@@ -32,6 +32,22 @@
                 </b-col>
                 <b-col md="7" cols="12">
                     <b-input placeholder="Chan" v-model="member.lastName" required class="roundeds"></b-input>
+                </b-col>
+            </b-row>
+            <b-row class="mt-2">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Chinese First Name</b></h6>
+                </b-col>
+                <b-col md="7" cols="12">
+                    <b-input placeholder="Tai Man" v-model="member.chineseFirstName" required class="roundeds"></b-input>
+                </b-col>
+            </b-row>
+            <b-row class="mt-2">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Chinese Last Name</b></h6>
+                </b-col>
+                <b-col md="7" cols="12">
+                    <b-input placeholder="Chan" v-model="member.chineseLastName" required class="roundeds"></b-input>
                 </b-col>
             </b-row>
             <b-row class="mt-2">
@@ -163,6 +179,8 @@ export default {
     },
     async submitMember() {
         let memberData = Object.assign({}, this.member)
+        delete memberData.Bookings
+        
         if(this.member.licenses.length == 1 && (this.member.licenses[0].name == null || this.member.licenses[0].name == "")) {
             delete memberData.licenses
         }
@@ -174,6 +192,7 @@ export default {
             }
         }
         this.editLoading = true
+        console.log(memberData)
         const resp = await this.updateIndividualMember(memberData)
         this.editLoading = false
         if(resp == 1) {

@@ -9,7 +9,7 @@
 
         <b-row v-if="!loading && !members.length">
             <b-col cols="12" class="text-center">
-                <h5 class="text-purple">No Corporate Member Found</h5>
+                <h5 class="text-green">No Corporate Member Found</h5>
             </b-col>
         </b-row>
 
@@ -35,7 +35,7 @@
                 </template>
                 <template v-slot:cell(action)="data">
                     <b-button size="sm" variant="danger" v-if="!selectedCorporate || selectedCorporate != data.item.id" @click="setCorporate(data.item.id)">Select</b-button>
-                    <p class="text-purple" v-if="selectedCorporate && selectedCorporate == data.item.id"><strong><i class="fa fa-check"></i> Selected</strong></p>
+                    <p class="text-green" v-if="selectedCorporate && selectedCorporate == data.item.id"><strong><i class="fa fa-check"></i> Selected</strong></p>
                 </template>
             </b-table>
 
@@ -58,7 +58,7 @@
         <b-modal id="del-modal" hide-footer centered>
             <b-container class="text-center">
                 <p> <b>Are you sure to delete the following member ?</b> </p>
-                <h5 class="text-purple">Gammon Ltd</h5>
+                <h5 class="text-green">Gammon Ltd</h5>
                 <div>
                 <b-button size="lg" variant="danger" pill>
                     Yes

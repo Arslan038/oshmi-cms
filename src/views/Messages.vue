@@ -13,7 +13,7 @@
 
       <b-row v-if="!loading && !messages.length">
           <b-col cols="12" class="text-center mt-3">
-              <h5 class="text-purple">No Message Found</h5>
+              <h5 class="text-green">No Message Found</h5>
           </b-col>
       </b-row>
 
@@ -51,7 +51,7 @@
     <b-modal title="Delete Message" v-model="deleteModal" hide-footer>
       <b-row>
         <b-col cols="12" class="text-center">
-          <p><strong class="text-purple">Are you sure you want to delete this message ?</strong></p>
+          <p><strong class="text-green">Are you sure you want to delete this message ?</strong></p>
         </b-col>
         <b-col cols="12" class="text-center">
           <b-button variant="danger" pill @click="removeMessage" :disabled="deleteLoading">{{deleteLoading ? 'Deleting Message...' : 'Yes, Delete Message'}}</b-button>

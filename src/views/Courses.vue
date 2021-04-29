@@ -5,7 +5,7 @@
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <CoursesHeader :create="true" addtext="Create course" reroute="/create-course" />
             <div class="mt-4 text-left text-primary">
-                <h4 class="text-purple">My Courses</h4>
+                <h4 class="text-green">My Courses</h4>
             </div>
 
             <b-row v-if="loading">
@@ -17,7 +17,7 @@
 
             <b-row v-if="!loading && !courses.length">
                 <b-col cols="12" class="text-center">
-                    <h5 class="text-purple">No Course Found</h5>
+                    <h5 class="text-green">No Course Found</h5>
                 </b-col>
             </b-row>
 
@@ -38,18 +38,20 @@
             <div class="mt-3">
                 <b-table v-if="!loading && courses.length" bordered :responsive="true" :current-page="currentPage" :per-page="rowsPerPage" striped hover :fields="fields" :filter="filter" :items="courses">
                     <!-- Cells -->
+                    <template v-slot:cell(id)="data">
+                        <span>{{data.item.id}}</span>
+                        <b-badge size="sm"
+                            v-clipboard="data.item.id"
+                            v-clipboard:success="onCopy"
+                            v-clipboard:error="onError"
+                            variant="success"
+                            class="ml-1 link"
+                        >
+                            <i class="fa fa-copy"></i> Copy
+                        </b-badge>
+                    </template>
                     <template v-slot:cell(periods)="data">
                         <span class="text-primary link" @click="viewLessons(data.item)">View Lessons</span>
-                        <!-- <b-row>
-                            <b-col cols="10">
-                                <div v-if="data.item.Lessons.length">
-                                    <span v-for="(lesson, index) in data.item.Periods" :key="index"></span>
-                                </div>
-                            </b-col>
-                            <b-col cols="2" align-self="center">
-                                <i v-b-modal.add-period-modal class="fas fa-plus-circle"></i>
-                            </b-col>
-                        </b-row> -->
                     </template>
 
                     <template v-slot:cell(status)="data">
@@ -80,7 +82,7 @@
                 </b-row>
                 <b-row v-if="!lessonsLoading && !courseLessons.length && course">
                     <b-col cols="12" class="text-center">
-                        <p>No Lesson Found for course <strong class="text-purple">{{course.name}}</strong></p>
+                        <p>No Lesson Found for course <strong class="text-green">{{course.name}}</strong></p>
                     </b-col>
                 </b-row>
                 <b-table-simple v-if="courseLessons.length && !lessonsLoading" striped bordered>
@@ -180,7 +182,7 @@
 
         <b-modal title="Delete Course" v-model="deleteModal" hide-footer centered>
             <b-container class="text-center" v-if="courseToDelete">
-                <p> <b>Are you sure you want to delete Course "<strong class="text-purple">{{courseToDelete.name}}</strong>" ?</b> </p>
+                <p> <b>Are you sure you want to delete Course "<strong class="text-green">{{courseToDelete.name}}</strong>" ?</b> </p>
                 <div>
                 <b-button variant="danger" pill @click="removeCourseNow" :disabled="deleteLoading">
                     {{deleteLoading ? 'Deleting Course...' : 'Yes'}}
@@ -196,7 +198,7 @@
 
         <b-modal title="Delete Lesson" v-model="deleteLessonModal" hide-footer hide-header-close no-close-on-backdrop centered>
             <b-container class="text-center" v-if="lessonToDelete">
-                <p> <b>Are you sure you want to delete Lesson <strong class="text-purple">{{lessonToDelete.name}}</strong> from "<strong class="text-purple">{{lessonToDelete.courseTitle}}</strong>" ?</b> </p>
+                <p> <b>Are you sure you want to delete Lesson <strong class="text-green">{{lessonToDelete.name}}</strong> from "<strong class="text-green">{{lessonToDelete.courseTitle}}</strong>" ?</b> </p>
                 <div>
                 <b-button variant="danger" pill @click="removeLessonNow" :disabled="deleteLessonLoading">
                     {{deleteLessonLoading ? 'Deleting Lesson...' : 'Yes'}}
@@ -214,7 +216,7 @@
             <b-form @submit.prevent v-if="courseToExport && courseToExport.Lessons.length">
                 <b-row>
                     <b-col cols="12" class="text-center">
-                        <p><strong class="text-purple">Export Lessons of {{ courseToExport.name }}</strong></p>
+                        <p><strong class="text-green">Export Lessons of {{ courseToExport.name }}</strong></p>
                     </b-col>
                     <b-col cols="12">
                         <b-form-group>
@@ -256,6 +258,29 @@
                         <b-form-group>
                             <label for="lesson_tutors">Select Tutors*</label>
                             <multiselect v-model="newLesson.tutors" :options="getTutors" :tagabled="true" :multiple="true" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Tutors" tag-placeholder="Select Tutors" label="name" track-by="name" :preselect-first="false"></multiselect>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" lg="12">
+                        <b-form-group>
+                            <label for="lesson_seats">Available Seats*</label>
+                            <b-form-input placeholder="Available Seats" type="number" class="rounded" v-model="newLesson.availableSeats" :required="true"></b-form-input>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" lg="12">
+                        <b-form-group>
+                            <label for="custom_address">Address*</label>
+                            <b-form-select class="rounded" @change="setNewLessonAddress" required>
+                                <b-form-select-option :value="null">Select Address*</b-form-select-option>
+                                <b-form-select-option value="九龍油麻地，彌敦道498-500號，泰盛商業(油麻地)大樓4樓">九龍油麻地，彌敦道498-500號，泰盛商業(油麻地)大樓4樓</b-form-select-option>
+                                <b-form-select-option value="Location 2">Location 2</b-form-select-option>
+                                <b-form-select-option value="other">Other</b-form-select-option>
+                            </b-form-select>
+                        </b-form-group>
+                    </b-col>
+                    <b-col cols="12" lg="12" v-if="newLesson.address_type === 'other'">
+                        <b-form-group>
+                            <label for="custom_address">Custom Address*</label>
+                            <b-form-input placeholder="Enter Address" type="number" class="rounded" v-model="newLesson.address" :required="true"></b-form-input>
                         </b-form-group>
                     </b-col>
                     <b-col cols="12" lg="6">
@@ -321,6 +346,12 @@ export default {
     },
     methods: {
         ...mapActions(["fetchCourses", "fetchCategories", "fetchTutors", "deleteCourse", "fetchCourseLessons", "deleteLesson", "createLesson"]),
+        onCopy() {
+            this.toast({title: "Copy Course ID", message: "Course ID Copied.", type: "success"})
+        },
+        onError() {
+            this.toast({title: "Copy Course ID", message: "Failed to Copy Course ID.", type: "danger"})
+        },
         removeCourse(item) {
             this.courseToDelete = Object.assign({}, item)
             this.deleteModal = true
@@ -372,9 +403,17 @@ export default {
             this.lessonModal = true
             this.addLessonModal = false
         },
+        setNewLessonAddress(e) {
+            const value = e
+            this.newLesson.address_type = value
+            if(value && value !== 'other') {
+                this.newLesson.address = value
+            }
+        },
         async submitLesson() {
             this.newLesson.courseId = this.course.id
             const lessonData = Object.assign({}, this.newLesson)
+            delete lessonData.address_type
 
             if(!lessonData.tutors.length) {
                 this.toast({title: "Add Lesson", message: "Please Select atleast 1 Tutor", type: "warning"})
@@ -469,8 +508,7 @@ export default {
             }
             
             this.export_data = this.courses
-            // delete this.export_data.CourseTutors
-            // delete this.export_data.courseCategories
+            console.log(this.export_data)
         },
     },
 
@@ -533,33 +571,43 @@ export default {
                 startDate: null,
                 endDate: null,
                 startTime: null,
-                endTime: null
+                endTime: null,
+                availableSeats: null,
+                address: null,
+                address_type: null,
             },
+            
             fields: [
+                {
+                    key: "id",
+                    label: "Course ID",
+                    sortable: true,
+                    sortByFormatted: true,
+                },
                 {
                     key: "name",
                     label: "Course Title",
                     sortable: true,
                     sortByFormatted: true,
                 },
-                {
-                    key: "availableSeats",
-                    label: "Class Size",
-                    sortable: true,
-                    sortByFormatted: true,
-                },
+                // {
+                //     key: "availableSeats",
+                //     label: "Class Size",
+                //     sortable: true,
+                //     sortByFormatted: true,
+                // },
                 {
                     key: "price",
                     label: "price",
                     sortable: true,
                     sortByFormatted: true,
                 },
-                {
-                    key: "address",
-                    label: "Location",
-                    sortable: true,
-                    sortByFormatted: true,
-                },
+                // {
+                //     key: "address",
+                //     label: "Location",
+                //     sortable: true,
+                //     sortByFormatted: true,
+                // },
                 {
                     key: "periods",
                 },
@@ -587,9 +635,7 @@ export default {
                 "Course Name": "name",
                 "Course Code": "courseCode",
                 "Description": "description",
-                "Address": "address",
                 "Price": "price",
-                "Class Size": "availableSeats",
                 "Course Nature": "courseNature",
                 "Certificate Effective Period": "certEffectivePeriod",
                 "Tutor": "tutors",

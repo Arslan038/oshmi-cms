@@ -12,7 +12,7 @@
 
             <b-row v-if="!loading && !bookings.length">
                 <b-col cols="12" class="text-center mt-3">
-                    <h5 class="text-purple">No Booking Found...</h5>
+                    <h5 class="text-green">No Booking Found...</h5>
                 </b-col>
             </b-row>
 

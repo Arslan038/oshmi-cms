@@ -9,7 +9,7 @@
         reroute="/add-individual-member"
       />
       <div class="mt-4 text-left text-primary">
-        <h4 class="text-purple">Individual Members</h4>
+        <h4 class="text-green">Individual Members</h4>
       </div>
 
       <b-row v-if="loading">
@@ -21,7 +21,7 @@
 
       <b-row v-if="!loading && !members.length">
         <b-col cols="12" class="text-center">
-            <h5 class="text-purple">No Individual Member Found</h5>
+            <h5 class="text-green">No Individual Member Found</h5>
         </b-col>
       </b-row>
 
@@ -162,6 +162,12 @@ export default {
         {
           key: "phone",
           label: "Phone",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
+          key: "idCard",
+          label: "HKID",
           sortable: true,
           sortByFormatted: true,
         },

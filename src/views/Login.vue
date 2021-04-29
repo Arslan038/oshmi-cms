@@ -30,13 +30,13 @@
 // @ is an alias to /src
 import LoginHeader from '@/components/LoginHeader.vue'
 import LoginSecondaryHeader from '@/components/LoginSecondaryHeader.vue'
-
+// import axios from 'axios'
 export default {
     name: 'Login',
     components: {
         LoginHeader,
         LoginSecondaryHeader
-    }
+    },
 }
 </script>
 

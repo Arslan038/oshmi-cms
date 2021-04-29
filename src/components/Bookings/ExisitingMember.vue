@@ -9,7 +9,7 @@
 
       <b-row v-if="!loading && !members.length">
         <b-col cols="12" class="text-center">
-            <h5 class="text-purple">No Individual Member Found</h5>
+            <h5 class="text-green">No Individual Member Found</h5>
         </b-col>
       </b-row>
 
@@ -31,7 +31,7 @@
             </template>
             <template v-slot:cell(action)="data">
               <b-button variant="danger" size="sm" v-if="!selectedMember || selectedMember != data.item.id" @click="selectMember(data.item.id)">Select</b-button>
-              <p class="text-purple" v-if="selectedMember && selectedMember == data.item.id"><strong><i class="fa fa-check"></i> Selected</strong></p>
+              <p class="text-green" v-if="selectedMember && selectedMember == data.item.id"><strong><i class="fa fa-check"></i> Selected</strong></p>
             </template>
         </b-table>
 

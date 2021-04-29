@@ -5,7 +5,7 @@
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <b-row>
                 <b-col class="mt-2 text-left text-primary">
-                    <h4 class="text-purple">Add Tutor</h4>
+                    <h4 class="text-green">Add Tutor</h4>
                 </b-col>
             </b-row>
 
@@ -101,7 +101,7 @@
                         />
                     </div>
                     <div class="d-flex justify-content-between mt-2" v-for="(file, index) in tutor.files" :key="index">
-                            <strong class="text-purple">{{file.name}}</strong>
+                            <strong class="text-green">{{file.name}}</strong>
                             <i @click="removeFile(index)" class="fa fa-times-circle"></i>
                         </div>
                     </b-col>

@@ -5,7 +5,7 @@
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <b-row>
                 <b-col cols="12" class="text-left">
-                    <h4 class="text-purple mb-5 mt-3">New Booking</h4>
+                    <h4 class="text-green mb-5 mt-3">New Booking</h4>
                 </b-col>
             </b-row>
             <b-row class="mb-5">
@@ -32,7 +32,7 @@
             
             <!-- <div v-if="new_member==false">
                 <div class="mt-2 text-left text-primary">
-                    <h4 class="text-purple mb-5">New Booking</h4>
+                    <h4 class="text-green mb-5">New Booking</h4>
                 </div>
                 <b-row>
                     <b-col md="6" cols="12">

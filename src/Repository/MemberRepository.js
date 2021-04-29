@@ -3,6 +3,7 @@ import Repository from './Repository'
 const create_individual_member = 'individualmember/create'
 const individual_member = 'individualmember'
 const search = `members/search/phone`
+const generate_receipt = `individualmember/receipt`
 
 export default {
     // Create Individual Member
@@ -27,5 +28,11 @@ export default {
     // Search By Phone
     searchByPhone(payload) {
         return Repository.get(`${search}/${payload}`)
+    },
+
+    // Generate Receipt
+    generateReceipt(payload) {
+        console.log(payload)
+        return Repository.post(`${generate_receipt}`, payload)
     }
 }

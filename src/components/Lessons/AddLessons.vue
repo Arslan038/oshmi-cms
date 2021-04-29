@@ -37,7 +37,7 @@
                         accept="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
                     />
                 </div>
-                <i class="fa fa-info-circle text-purple"> You can upload only Excel File</i>
+                <i class="fa fa-info-circle text-green"> You can upload only Excel File</i>
                 <div v-if="file" class="">
                     <strong>{{file.name}}</strong>
                 </div>

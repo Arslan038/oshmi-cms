@@ -6,7 +6,7 @@
             <CoursesHeader :create="true" addtext="Add Tutor" reroute="/add-tutor" />
 
             <div class="mt-4 text-left text-primary">
-                <h4 class="text-purple">My Tutors</h4>
+                <h4 class="text-green">My Tutors</h4>
             </div>
 
             <b-row v-if="loading">
@@ -18,7 +18,7 @@
 
             <b-row v-if="!loading && !tutors.length">
                 <b-col cols="12" class="text-center">
-                    <h5 class="text-purple">No Tutor Found</h5>
+                    <h5 class="text-green">No Tutor Found</h5>
                 </b-col>
             </b-row>
 
@@ -52,7 +52,7 @@
         </b-container>
         <b-modal title="Delete Tutor" v-model="deleteModal" hide-footer centered>
             <b-container class="text-center" v-if="tutorToDelete">
-                <p> <b>Are you sure you want to delete tutor "<strong class="text-purple">{{tutorToDelete.name}}</strong>" ?</b> </p>
+                <p> <b>Are you sure you want to delete tutor "<strong class="text-green">{{tutorToDelete.name}}</strong>" ?</b> </p>
                 <div>
                 <b-button variant="danger" pill @click="removeTutorNow" :disabled="deleteLoading">
                     {{deleteLoading ? 'Deleting Tutor...' : 'Yes'}}
@@ -105,6 +105,7 @@ export default {
         }
     },
     async created() {
+
         if(this.getTutors.length < 1) {
             this.loading = true
             await this.fetchTutors()

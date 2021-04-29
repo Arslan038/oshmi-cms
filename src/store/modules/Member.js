@@ -121,6 +121,25 @@ const actions = {
             commit("setToast", {message: err.message, title: "Search Member", type: "danger"})
             return 0
         }
+    },
+
+    // Generate Receipt
+    async generateReceipt({commit}, payload) {
+        try {
+            const resp = await MemberRepository.generateReceipt(payload);
+            console.log(resp)
+            if(resp.data.status) {
+                return resp.data.pdf
+            }
+            else {
+                commit("setToast", {message: resp.data.message, title: "Generate Receipt", type: "danger"})
+                return 0
+            }
+        }
+        catch(err) {
+            commit("setToast", {message: err.message, title: "Generate Receipt", type: "danger"})
+            return 0
+        }
     }
 }
 

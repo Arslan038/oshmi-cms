@@ -2,7 +2,7 @@
  <div class="home">
     <b-container class="mt-2 pb-5 pt-2 mt-3">
         <div class="mt-2 text-left text-primary mb-5">
-            <h4 class="text-purple">(New Member)</h4>
+            <h4 class="text-green">(New Member)</h4>
         </div>
         <b-form @submit.prevent="submitMember">
             <b-row class="mt-2">
@@ -19,6 +19,22 @@
                 </b-col>
                 <b-col md="9" cols="12">
                     <b-input placeholder="Chan" v-model="member.lastName" required class="roundeds"></b-input>
+                </b-col>
+            </b-row>
+            <b-row class="mt-2">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Chinese First Name</b></h6>
+                </b-col>
+                <b-col md="7" cols="12">
+                    <b-input placeholder="Tai Man" v-model="member.chineseFirstName" required class="roundeds"></b-input>
+                </b-col>
+            </b-row>
+            <b-row class="mt-2">
+                <b-col md="3" class="text-left" cols="12">
+                    <h6><b>Chinese Last Name</b></h6>
+                </b-col>
+                <b-col md="7" cols="12">
+                    <b-input placeholder="Chan" v-model="member.chineseLastName" required class="roundeds"></b-input>
                 </b-col>
             </b-row>
             <b-row class="mt-2">
@@ -124,6 +140,8 @@ export default {
         member: {
             firstName: null,
             lastName: null,
+            chineseFirstName: null,
+            chineseLastName: null,
             email: null,
             phone: null,
             idCard: null,

@@ -87,7 +87,7 @@
     <b-modal id="delact" hide-footer centered>
       <b-container class="text-center">
         <p> <b>Are you sure to delete the following news ?</b> </p>
-        <h5 class="text-purple">演示内容 演示内容 演示内容</h5>
+        <h5 class="text-green">演示内容 演示内容 演示内容</h5>
         <div>
           <b-button size="lg" variant="danger" pill>
              Yes

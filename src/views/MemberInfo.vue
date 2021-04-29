@@ -4,7 +4,7 @@
     <SecondaryHeader msg="Welcome to Your Vue.js App" />
     <b-container class="card bg-white mt-2 pb-5 pt-2">
         <div class="mt-2 text-left text-primary">
-            <h4 class="text-purple">Member Info</h4>
+            <h4 class="text-green">Member Info</h4>
         </div>
         <b-row class="mt-2">
             <b-col md="3" class="text-left" cols="12">

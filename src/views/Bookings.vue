@@ -6,7 +6,7 @@
             <CoursesHeader :create="true" addtext="Add Booking" reroute="/add-booking" />
 
             <div class="mt-4 text-left text-primary">
-                <h4 class="text-purple">Bookings</h4>
+                <h4 class="text-green">Bookings</h4>
             </div>
 
             <b-row v-if="loading">
@@ -18,7 +18,7 @@
 
             <b-row v-if="!loading && !bookings.length">
                 <b-col cols="12" class="text-center">
-                    <h5 class="text-purple">No Booking Found</h5>
+                    <h5 class="text-green">No Booking Found</h5>
                 </b-col>
             </b-row>
 
@@ -45,9 +45,10 @@
                     <template v-slot:cell(bookedAs)="data">
                         <span class="smalls">{{data.item.corporateId ? 'Corporate' : 'Student'}}</span>
                     </template>
-                    <!-- <template v-slot:cell(payment)="data">
-                        <span class="smalls">{{data.item.corporateId ? 'Monthy' : 'Offline'}}</span>
-                    </template> -->
+                    <template v-slot:cell(name)="data">
+                        <span class="smalls" v-if="data.item.IndividualMember">{{data.item.IndividualMember.firstName}} {{data.item.IndividualMember.lastName}}</span>
+                        <span class="smalls" v-if="data.item.CorporateMember">{{data.item.CorporateMember.name}}</span>
+                    </template>
                     <template v-slot:cell(bookingPrice)="data">
                         <span>{{data.item.bookingPrice}} HKD</span>
                         <!-- <b-badge variant="danger">Invoice</b-badge> -->
@@ -145,6 +146,12 @@ export default {
           sortByFormatted: true,
         },
         {
+          key: "name",
+          label: "Candidate Name",
+          sortable: true,
+          sortByFormatted: true,
+        },
+        {
           key: 'payment_type',
           label: "Payment Type",
           sortable: true,
@@ -175,6 +182,7 @@ export default {
         export_fields: {
             "Booking ID": "id",
             "Lesson": "lesson",
+            "Candidate Name": "candidate_name",
             "Candidate Type": "candidate_type",
             "Corporate": "corporate",
             "Payment": "payment_type",

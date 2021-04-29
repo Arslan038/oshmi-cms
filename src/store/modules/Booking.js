@@ -3,12 +3,14 @@ const BookingRepository = RepositoryFactory.get('booking_repository')
 
 const state = {
     bookings: [],
-    lesson_bookings: []
+    lesson_bookings: [],
+    booking_attendance: null,
 }
 
 const getters = {
     getBookings: state => state.bookings,
-    getLessonBookings: state => state.lesson_bookings
+    getLessonBookings: state => state.lesson_bookings,
+    getBookingAttendance: state => state.booking_attendance
 }
 
 const actions = {
@@ -93,7 +95,47 @@ const actions = {
             commit("setToast", {message: err.message, title: "Update Booking", type: "danger"})
             return 0
         }
-    }
+    },
+
+    // Update Booking Payment Method
+    async updateBookingPaymentMethod({commit}, payload) {
+        try {
+            const resp = await BookingRepository.updateBookingPaymentMethod(payload)
+            if(resp.data.success) {
+                commit("setToast", {message: "Payment Method Updated Successfully", title: "Update Payment Method", type: "success"})
+                commit('editPaymentMethod', payload)
+                return 1
+            }
+            else {
+                commit("setToast", {message: "Something went wrong.", title: "Update Payment Method", type: "danger"})
+                return 0
+            }
+        }
+        catch(err) {
+            commit("setToast", {message: err.message, title: "Update Payment Method", type: "danger"})
+            return 0
+        }
+    },
+
+    // Fetch Attendance
+    async fetchAttendance({commit}, payload) {
+        try {
+            commit('setAttendance', null)
+            const resp = await BookingRepository.fetchAttendance(payload)
+            if(resp.data.status) {
+                commit('setAttendance', resp.data.data)
+                return 1
+            }
+            else {
+                commit("setToast", {message: "Waiting for candidate input", title: "Booking Attendance", type: "danger"})
+                return 0
+            }
+        }
+        catch(err) {
+            commit("setToast", {message: "Waiting for candidate input", title: "Booking Attendance", type: "danger"})
+            return 0
+        }
+    },
 }
 
 const mutations = {
@@ -121,7 +163,17 @@ const mutations = {
             }
             return t
         })
-    }
+    },
+    editPaymentMethod: (state, payload) => {
+        state.bookings = state.bookings.map(t => {
+            if(t.id == payload.id) {
+                t.paymentMethod = payload.paymentMethod
+                return Object.assign({}, t, payload)
+            }
+            return t
+        })
+    },
+    setAttendance: (state, payload) => state.booking_attendance = payload
 }
 
 export default {

@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": "dist",
-    "site":"oshmi-platform",
+    "site":"oshmi-admin",
     "ignore": [
       "firebase.json",
       "**/.*",

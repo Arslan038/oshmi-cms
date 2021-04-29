@@ -14,7 +14,7 @@
 
             <b-row v-if="!loading && !categories.length">
                 <b-col cols="12" class="text-center mt-3">
-                    <h5 class="text-purple">No Category Found</h5>
+                    <h5 class="text-green">No Category Found</h5>
                 </b-col>
             </b-row>
 
@@ -107,7 +107,7 @@
 
         <b-modal title="Delete Category" v-model="deleteModal" hide-footer centered>
             <b-container class="text-center" v-if="categoryToDelete">
-                <p> <b>Are you sure you want to delete category "<strong class="text-purple">{{categoryToDelete.name}}</strong>" ?</b> </p>
+                <p> <b>Are you sure you want to delete category "<strong class="text-green">{{categoryToDelete.name}}</strong>" ?</b> </p>
                 <div>
                 <b-button variant="danger" pill @click="removeCategoryNow" :disabled="deleteLoading">
                     {{deleteLoading ? 'Deleting Category...' : 'Yes'}}

@@ -5,7 +5,7 @@
         <b-container class="card bg-white mt-2 pb-5 pt-2">
             <b-row>
                 <b-col class="mt-2 text-left text-primary">
-                    <h4 class="text-purple">Edit Corporate</h4>
+                    <h4 class="text-green">Edit Corporate</h4>
                 </b-col>
             </b-row>
 
@@ -146,11 +146,11 @@
                             />
                         </div>
                         <div class="d-flex justify-content-between mt-2" v-for="(file, index) in oldFiles" :key="file.id">
-                            <strong class="text-purple">{{file.name}}.{{file.extension}}</strong>
+                            <strong class="text-green">{{file.name}}.{{file.extension}}</strong>
                             <i @click="removeFile(file,index)" class="fa fa-times-circle"></i>
                         </div>
                         <div class="d-flex justify-content-between mt-2" v-for="(file, index) in newUploads" :key="index">
-                            <strong class="text-purple">{{file.name}}</strong>
+                            <strong class="text-green">{{file.name}}</strong>
                             <i @click="removeUploadedFile(index)" class="fa fa-times-circle"></i>
                         </div>
                     </b-col>
@@ -220,7 +220,7 @@ export default {
             this.corporate.discountStartDate = this.corporate.discountStartDate.split('T')[0]
             this.corporate.discountEndDate = this.corporate.discountEndDate.split('T')[0]
 
-            if(this.corporate.corporatecourses.length) {
+            if(this.corporate.corporatecourses && this.corporate.corporatecourses.length) {
                 this.courseList = []
                 this.corporate.corporatecourses.forEach(c => {
                     delete c.CorporateCourses

@@ -36,13 +36,7 @@
           </b-col>
       </b-row>
 
-      <b-row v-if="!loading && search.lesson && search.corporate && !bookings.length">
-          <b-col cols="12" class="text-center mt-3">
-              <h5 class="text-purple">No Attendance Found</h5>
-          </b-col>
-      </b-row>
-
-      <div class="mt-2 text-md-left d-md-flex d-block d-lg-flex" v-if="!loading && bookings.length">
+      <div class="mt-4 text-md-left d-md-flex d-block d-lg-flex" v-if="!loading && search.lesson && search.corporate">
         <div class="self-center text-left">
           Search
         </div>
@@ -50,9 +44,11 @@
           <input class="border-hids form-control col-md-12" />
         </div>
         <div class="ml-2">
-          <select class="form-control rounded" v-model="filter">
+          <select class="form-control rounded" @change="filteredBookings">
             <option :value="null" selected disabled>--Select--</option>
+            <option value="all">All</option>
             <option value="pending">Pending</option>
+            <option value="checked in">Checked In</option>
             <option value="finished">Finished</option>
             <option value="absent">Absent</option>
             <option value="failed">Failed</option>
@@ -61,14 +57,27 @@
         </div>
         <div class="ml-auto">
           <b-button
+            variant="danger"
+            class="mr-1"
+            pill
+            @click="$bvModal.show('actions')"
+            >Download Receipts</b-button
+          >
+          <b-button
             variant="info"
             class="pr-3 pl-3"
             pill
             @click="$bvModal.show('actions')"
-            >Export</b-button
+            >Download Card Data</b-button
           >
         </div>
       </div>
+
+      <b-row v-if="!loading && search.lesson && search.corporate && !bookings.length">
+          <b-col cols="12" class="text-center mt-3">
+              <h5 class="text-green">No Attendance Found</h5>
+          </b-col>
+      </b-row>
 
       <div class="mt-3" v-if="!loading && bookings.length">
          <b-table bordered :responsive="true" :fields="fields" :filter="filter" :items="bookings" :current-page="currentPage" :per-page="rowsPerPage">
@@ -76,8 +85,8 @@
             <template v-slot:cell(name)="data">
                 <span class="smalls">{{data.item.IndividualMember.firstName}} {{data.item.IndividualMember.lastName}} </span>
             </template>
-            <template v-slot:cell(member_id)="data">
-                <span class="smalls">{{data.item.IndividualMember.id}}</span>
+            <template v-slot:cell(phone)="data">
+                <span class="smalls">{{data.item.IndividualMember.phone}}</span>
             </template>
             <template v-slot:cell(lesson_date)="data">
                 <span class="smalls">{{getDate(data.item.Lesson.startDate)}}</span>
@@ -95,6 +104,9 @@
             </template>
             <template v-slot:cell(status)="data">
                 <b-button @click="update(data.item)" v-if="data.item.status=='pending'" size="sm" variant="outline-info" class="rounds">
+                  {{data.item.status}}
+                </b-button>
+                <b-button @click="update(data.item)" v-if="data.item.status=='checked in'" size="sm" variant="outline-primary" class="rounds">
                   {{data.item.status}}
                 </b-button>
                 <b-button @click="update(data.item)" v-if="data.item.status=='finished'" size="sm" variant="success" class="rounds">
@@ -137,6 +149,7 @@
                 <label for="status"><strong>Select Status</strong></label>
                 <b-form-select v-model="bookingToEdit.status" @change="updateStatus" required>
                   <b-form-select-option value="pending">Pending</b-form-select-option>
+                  <b-form-select-option value="checked in">Checked In</b-form-select-option>
                   <b-form-select-option value="finished">Finished</b-form-select-option>
                   <b-form-select-option value="failed">Failed</b-form-select-option>
                   <b-form-select-option value="absent">Absent</b-form-select-option>
@@ -169,6 +182,27 @@ export default {
   },
   methods: {
     ...mapActions(["fetchLessons", "fetchBookings", "fetchCorporateMembers", "updateBooking"]),
+    filteredBookings(e) {
+      const type = e.target.value
+      if(type === 'all') {
+        this.bookings = this.getBookings.filter(booking => booking.Lesson.id == this.search.lesson.id && booking.corporateId == this.search.corporate.id)
+      }
+      if(type === 'pending') {
+        this.bookings = this.getBookings.filter(booking => booking.Lesson.id == this.search.lesson.id && booking.corporateId == this.search.corporate.id && booking.status === 'pending')
+      }
+      if(type === 'checked in') {
+        this.bookings = this.getBookings.filter(booking => booking.Lesson.id == this.search.lesson.id && booking.corporateId == this.search.corporate.id && booking.status === 'checked in')
+      }
+      if(type === 'finished') {
+        this.bookings = this.getBookings.filter(booking => booking.Lesson.id == this.search.lesson.id && booking.corporateId == this.search.corporate.id && booking.status === 'finished')
+      }
+      if(type === 'absent') {
+        this.bookings = this.getBookings.filter(booking => booking.Lesson.id == this.search.lesson.id && booking.corporateId == this.search.corporate.id && booking.status === 'absent')
+      }
+      if(type === 'failed') {
+        this.bookings = this.getBookings.filter(booking => booking.Lesson.id == this.search.lesson.id && booking.corporateId == this.search.corporate.id && booking.status === 'failed')
+      }
+    },
     lessonWithCourse({ name, course }) {
       return `${name} — ${course.name}`
     },
@@ -232,8 +266,8 @@ export default {
           sortByFormatted: true,
         },
         {
-          key: "member_id",
-          label: "Member ID",
+          key: "phone",
+          label: "Phone",
         },
         {
           key: "lesson_date",

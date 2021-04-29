@@ -16,7 +16,7 @@ const actions = {
     async createCorporateMember({commit}, payload) {
         try {
             const resp = await CorporateRepository.createCorporateMember(payload)
-            console.log()
+            console.log(resp)
             if(resp.data.status) {
                 commit('addCorporateMember', resp.data.member)
                 commit("setToast", {message: resp.data.message, title: "Create Corporate Member", type: "success"})
@@ -41,12 +41,11 @@ const actions = {
         try {
             commit('setCorporateMembers', [])
             const resp = await CorporateRepository.fetchCorporateMembers();
-            if(resp.data && resp.data.length) {
+            if(resp.data.length > 0) {
                 commit('setCorporateMembers', resp.data)
                 return 1
             }
-            else {
-                commit("setToast", {message: resp.data.message, title: "Corporate Members", type: "danger"})
+            if(resp.data.length < 1) {
                 return 0
             }
         }
@@ -60,8 +59,9 @@ const actions = {
     async fetchCorporateMember({commit}, payload) {
         try {
             const resp = await CorporateRepository.fetchCorporateMember(payload);
-            if(resp.data.success) {
-                commit('setCorporateMember', resp.data.member)
+            console.log(resp.data)
+            if(resp.data.status) {
+                commit('setCorporateMember', resp.data.data.corporateData)
                 return 1
             }
             else {

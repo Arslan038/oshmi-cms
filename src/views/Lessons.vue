@@ -6,7 +6,7 @@
             <CoursesHeader :create="false" />
 
             <div class="mt-4 text-left text-primary">
-                <h4 class="text-purple">Upcoming Lessons</h4>
+                <h4 class="text-green">Upcoming Lessons</h4>
             </div>
 
             <b-row v-if="loading">
@@ -18,7 +18,7 @@
 
             <b-row v-if="!loading && !lessons.length">
                 <b-col cols="12" class="text-center">
-                    <h5 class="text-purple">No Lesson Found</h5>
+                    <h5 class="text-green">No Lesson Found</h5>
                 </b-col>
             </b-row>
 
@@ -42,10 +42,10 @@
                         <span class="smalls">{{data.item.course.name}}</span>
                     </template>
                     <template v-slot:cell(classSize)="data">
-                        <span class="smalls">{{data.item.course.availableSeats}}</span>
+                        <span class="smalls">{{data.item.availableSeats}}</span>
                     </template>
                     <template v-slot:cell(location)="data">
-                        <span class="smalls">{{data.item.course.address}}</span>
+                        <span class="smalls">{{data.item.address}}</span>
                     </template>
                     <template v-slot:cell(startDate)="data">
                         <span class="smalls">{{getDate(data.item.startDate)}}</span>
@@ -81,6 +81,18 @@
                             <b-form-group>
                                 <label for="lesson_tutors">Select Tutors*</label>
                                 <multiselect v-model="tutorList" :options="getTutors" :tagabled="true" :multiple="true" :close-on-select="true" :clear-on-select="false" :preserve-search="true" placeholder="Select Tutors" tag-placeholder="Select Tutors" label="name" track-by="name" :preselect-first="false"></multiselect>
+                            </b-form-group>
+                        </b-col>
+                        <b-col cols="12" lg="12">
+                            <b-form-group>
+                                <label for="lesson_seats">Available Seats*</label>
+                                <b-form-input placeholder="Available Seats" type="number" class="rounded" v-model="lessonToEdit.availableSeats" :required="true"></b-form-input>
+                            </b-form-group>
+                        </b-col>
+                        <b-col cols="12" lg="12">
+                            <b-form-group>
+                                <label for="lesson_address">Address*</label>
+                                <b-form-input placeholder="Enter Address" type="text" class="rounded" v-model="lessonToEdit.address" :required="true"></b-form-input>
                             </b-form-group>
                         </b-col>
                         <b-col cols="12" lg="6">

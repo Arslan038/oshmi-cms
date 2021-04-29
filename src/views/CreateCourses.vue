@@ -6,7 +6,7 @@
             <b-form @submit.prevent="submitCourse">
                 <b-row>
                     <b-col class="mt-2 text-left text-primary">
-                        <h4 class="text-purple">Create Course</h4>
+                        <h4 class="text-green">Create Course</h4>
                     </b-col>
                     <b-col class="mt-2 text-right">
                         <b-button variant="danger" class="float-right pr-3 pl-3" type="submit" pill :disabled="loading">{{loading ? 'Creating Course' : 'Save'}}</b-button>
@@ -38,7 +38,7 @@
                     </b-col>
                     <b-col md="10" class="text-left">
                         <b-form-input placeholder="Course Code" v-model="course.courseCode" class="rounded" required></b-form-input>
-                        <i class="fa fa-info-circle text-purple"> Course Code cannot be changed after course creation.</i>
+                        <i class="fa fa-info-circle text-green"> Course Code cannot be changed after course creation.</i>
                     </b-col>
                 </b-row>
 
@@ -59,14 +59,14 @@
                     </b-col>
                 </b-row>
 
-                <b-row class="mt-2">
+                <!-- <b-row class="mt-2">
                     <b-col md="2" class="text-left">
                         <b>Address</b>
                     </b-col>
                     <b-col md="10" class="text-left">
                         <b-form-input placeholder="Address" class="rounded" required v-model="course.address"></b-form-input>
                     </b-col>
-                </b-row>
+                </b-row> -->
                 <b-row class="mt-2">
                     <b-col md="2" class="text-left">
                         <b>Course Price</b>
@@ -76,14 +76,14 @@
                     </b-col>
                 </b-row>
 
-                <b-row class="mt-2">
+                <!-- <b-row class="mt-2">
                     <b-col md="2" class="text-left">
                         <b>Available Seats</b>
                     </b-col>
                     <b-col md="10" class="text-left">
                         <b-form-input placeholder="Available Seats" type="number" class="rounded" required v-model="course.availableSeats"></b-form-input>
                     </b-col>
-                </b-row>
+                </b-row> -->
 
                 <b-row class="mt-2">
                     <b-col md="2" class="text-left">
@@ -122,8 +122,8 @@
                     <b-col md="2" class="text-left" cols="12">
                         <b>Course Description</b>
                     </b-col>
-                    <b-col md="10" cols="12">
-                        <vue-editor v-model="course.description" placeholder="Enter Course Description"></vue-editor>
+                    <b-col md="10" cols="12" class="text-left">
+                        <vue-editor v-model="course.description" :editor-toolbar="customToolbar" placeholder="Enter Course Description"></vue-editor>
                     </b-col>
                 </b-row>
 
@@ -173,7 +173,7 @@
                         />
                     </div>
                     <div class="d-flex justify-content-between mt-2" v-for="(file, index) in course.files" :key="index">
-                            <strong class="text-purple">{{file.name}}</strong>
+                            <strong class="text-green">{{file.name}}</strong>
                             <i @click="removeFile(index)" class="fa fa-times-circle"></i>
                         </div>
                     </b-col>
@@ -250,6 +250,7 @@ import SecondaryHeader from '@/components/SecondaryHeader.vue'
 import { VueEditor } from "vue2-editor";
 import Multiselect from 'vue-multiselect';
 import {mapActions, mapGetters} from 'vuex'
+import moment from 'moment'
 export default {
     name: 'CreateCourse',
     computed: {
@@ -310,6 +311,7 @@ export default {
         },
         async submitCourse() {
             let courseData = Object.assign({}, this.course)
+            
             // Check if Picture Not Uploaded
             if(!courseData.picture) {
                 this.toast({title: "Create Course", message: "Please Upload Course Picture.", type: "warning"})
@@ -351,6 +353,11 @@ export default {
             if(!this.is_cert) {
                 this.course.certEffectivePeriod = "N/A"
             }
+            else {
+                // Cert Expiry Date
+                const years = courseData.certEffectivePeriod.split(' ')[0]
+                courseData.certExpDate = moment().add(years, 'Y').format('YYYY-MM-DD');
+            }
 
             // Convert to Form Data
             var form_data = new FormData();
@@ -389,7 +396,7 @@ export default {
             all_categories: [],
             loading: false,
             errors: [],
-            courseNatures: ['License Renewal', 'New Course'],
+            courseNatures: ['License Renewal', 'New Course', "Other"],
             course: {
                 courseCode: null,
                 name: null,
@@ -398,6 +405,7 @@ export default {
                 price: null,
                 availableSeats: null,
                 certEffectivePeriod: null,
+                certExpDate: null,
                 tutors: [],
                 categories: [],
                 files: [],
