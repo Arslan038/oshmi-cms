@@ -56,22 +56,22 @@
           </select>
         </div>
         <div class="ml-auto">
-          <b-button
-            variant="danger"
-            class="mr-1"
-            pill
-            @click="$bvModal.show('actions')"
-            >Download Receipts</b-button
-          >
-          <b-button
+          <!-- <b-button
             variant="info"
             class="pr-3 pl-3"
             pill
             @click="$bvModal.show('actions')"
             >Download Card Data</b-button
-          >
+          > -->
+          <b-button v-if="bookings.length" variant="success" class="mr-1" size="sm" :disabled="downloading" pill @click="exportAttendance">Attendance</b-button> 
         </div>
       </div>
+
+      <b-row v-if="downloading" class="mt-3">
+        <b-col cols="12">
+          <b-alert show variant="info">Downloading Receipts. Please wait...</b-alert>
+        </b-col>
+      </b-row>
 
       <b-row v-if="!loading && search.lesson && search.corporate && !bookings.length">
           <b-col cols="12" class="text-center mt-3">
@@ -96,11 +96,6 @@
             </template>
             <template v-slot:cell(payment_type)="data">
                 <span class="smalls">{{data.item.bookedAs == 'corporate' ? 'Monthy' : 'Offline'}}</span>
-            </template>
-            <template v-slot:cell(receipt)="">
-                <b-button size="sm" variant="outline-danger" class="rounds">
-                  Download Receipt
-                </b-button>
             </template>
             <template v-slot:cell(status)="data">
                 <b-button @click="update(data.item)" v-if="data.item.status=='pending'" size="sm" variant="outline-info" class="rounds">
@@ -169,6 +164,7 @@ import SecondaryHeader from "@/components/SecondaryHeader.vue";
 import CorporateHeader from "../components/CorporateHeader.vue";
 import {mapActions, mapGetters} from 'vuex'
 import Multiselect from 'vue-multiselect';
+import axios from 'axios'
 export default {
   name: "Attendance",
   components: {
@@ -181,7 +177,7 @@ export default {
     ...mapGetters(['getLessons', 'getBookings', 'getCorporateMembers'])
   },
   methods: {
-    ...mapActions(["fetchLessons", "fetchBookings", "fetchCorporateMembers", "updateBooking"]),
+    ...mapActions(["fetchLessons", "fetchBookings", "fetchCorporateMembers", "updateBooking", "generateAttendance"]),
     filteredBookings(e) {
       const type = e.target.value
       if(type === 'all') {
@@ -217,7 +213,64 @@ export default {
       if(resp == 1) {
         this.updateModal = false
       }
-    }
+    },
+    // Export Attendance
+    async exportAttendance() {
+      this.export_attendance = []
+      if(this.bookings && this.bookings.length) {
+        console.log(this.bookings)
+        this.bookings.forEach((item,index) => {
+          const chineseFName = item.IndividualMember && item.IndividualMember.chineseFirstName ? item.IndividualMember.chineseFirstName : "";
+          const chineseLName = item.IndividualMember && item.IndividualMember.chineseLastName ? item.IndividualMember.chineseLastName : "";
+          const obj = {
+            no: index + 1,
+            company: item.CorporateMember ? item.CorporateMember.corporateName : "",
+            english_name: item.IndividualMember ? item.IndividualMember.lastName.toUpperCase() + ", " + item.IndividualMember.firstName : "",
+            chinese_name: chineseFName + " " + chineseLName,
+            fee: item.bookingPrice,
+            id_card: item.IndividualMember ? item.IndividualMember.idCard : "",
+            dob: "",
+            position: "",
+            sign1: "",
+            sign2: ""
+
+          }
+          // Export Attendance Data
+          this.export_attendance.push(obj)
+        })
+        const payload = {
+          info: {
+            course: this.search.lesson.course.name,
+            lesson: this.search.lesson.lessonCode,
+            tutor: this.search.lesson.tutors[0].name,
+            date: this.getDate(this.search.lesson.startDate),
+            time: this.search.lesson.startTime + ' - ' + this.search.lesson.endTime
+          },
+          attendance: this.export_attendance
+        }
+        this.downloading = true
+        const resp = await this.generateAttendance(payload)
+        if(resp && resp !== 0) {
+          this.downloadFile(resp, "Individual Member Receipts")
+        }
+        else {
+          this.downloading = false
+        }
+      }
+    },
+    // Download File
+    downloadFile(link, name){
+      this.downloading = true
+      axios({
+          method: 'get',
+          url: link,
+          responseType: 'arraybuffer'
+      })
+      .then(response => {
+      })
+      .catch((err) => console.log(err))
+      this.downloading = false
+    },
   },
   async created() {
     if(!this.getLessons.length) {
@@ -249,6 +302,7 @@ export default {
   data() {
     return {
       loading: false,
+      downloading: false,
       bookingToEdit: null,
       updateModal: false,
       updating: false,
@@ -258,6 +312,7 @@ export default {
       },
       corporate: null,
       bookings: [],
+      export_attendance: [],
       fields: [
         {
           key: "name",
@@ -292,10 +347,6 @@ export default {
           label: "Status",
           sortable: true,
           sortByFormatted: true,
-        },
-        {
-          key: "receipt",
-          label: "Receipt",
         },
         {
           key: "action",

@@ -4,6 +4,7 @@ const create_individual_member = 'individualmember/create'
 const individual_member = 'individualmember'
 const search = `members/search/phone`
 const generate_receipt = `individualmember/receipt`
+const generate_attendance = `individualmember/attendance/generate`
 
 export default {
     // Create Individual Member
@@ -34,5 +35,11 @@ export default {
     generateReceipt(payload) {
         console.log(payload)
         return Repository.post(`${generate_receipt}`, payload)
+    },
+
+    // Generate Attendance
+    generateAttendance(payload) {
+        console.log(payload)
+        return Repository.post(`${generate_attendance}`, payload)
     }
 }

@@ -45,9 +45,10 @@
           </select>
         </div>
         <div class="ml-auto d-flex">
-          <download-excel :data="export_attendance" :export-fields="export_fields" :header="export_attendance_header" name="Attendance" worksheet="Attendance">
-              <b-button variant="success" class="mr-1" size="sm" pill>Attendance</b-button>    
-          </download-excel>
+          <!-- <download-excel :data="export_attendance" :export-fields="export_fields" :header="export_attendance_header" name="Attendance" worksheet="Attendance">
+              <b-button variant="success" class="mr-1" size="sm" pill @click="exportAttendance">Attendance</b-button>    
+          </download-excel> -->
+          <b-button variant="success" class="mr-1" size="sm" :disabled="downloading" pill @click="exportAttendance">Attendance</b-button> 
           <download-excel :data="export_attendance" :export-fields="export_fields" :header="export_attendance_header" name="Attendance" worksheet="Attendance">
               <b-button variant="success" class="mr-1" size="sm" pill>Practice Checklist</b-button>    
           </download-excel>
@@ -57,7 +58,7 @@
           <!-- <download-excel :data="export_attendance" :export-fields="export_fields" :header="export_attendance_header" name="Attendance" worksheet="Attendance">
                  
           </download-excel> -->
-          <b-button variant="success" class="mr-1 py-0" size="sm" pill @click="getReceipts">Receipts</b-button> 
+          <b-button variant="success" class="mr-1 py-0" size="sm" pill :disabled="downloading" @click="getReceipts">Receipts</b-button> 
           <download-excel :data="export_attendance" :export-fields="export_fields" :header="export_attendance_header" name="Attendance" worksheet="Attendance">
               <b-button variant="success" class="mr-1" size="sm" pill>Card Data</b-button>    
           </download-excel>
@@ -94,8 +95,8 @@
             <template v-slot:cell(payment_type)="data">
                 <span class="smalls">{{data.item.bookedAs == 'corporate' ? 'Monthy' : 'Offline'}}</span>
             </template>
-            <template v-slot:cell(receipt)="">
-                <b-button size="sm" variant="outline-danger" class="rounds">
+            <template v-slot:cell(receipt)="data">
+                <b-button size="sm" variant="outline-danger" class="rounds" :disabled="downloading" @click="getSingleReceipt(data.item)">
                   Download Receipt
                 </b-button>
             </template>
@@ -166,6 +167,7 @@ import SecondaryHeader from "@/components/SecondaryHeader.vue";
 import CorporateHeader from "../components/CorporateHeader.vue";
 import {mapActions, mapGetters} from 'vuex'
 import Multiselect from 'vue-multiselect';
+import axios from 'axios'
 export default {
   name: "Attendance",
   components: {
@@ -178,7 +180,7 @@ export default {
     ...mapGetters(['getLessons', 'getBookings']),
   },
   methods: {
-    ...mapActions(["fetchLessons", "fetchBookings", "updateBooking", "generateReceipt"]),
+    ...mapActions(["fetchLessons", "fetchBookings", "updateBooking", "generateReceipt", "generateAttendance"]),
     filteredBookings(e) {
       const type = e.target.value
       if(type === 'all') {
@@ -245,9 +247,70 @@ export default {
       }
     },
 
+    // Export Attendance
+    async exportAttendance() {
+      this.export_attendance = []
+      if(this.bookings && this.bookings.length) {
+        this.bookings.forEach((item,index) => {
+          const obj = {
+            no: index + 1,
+            company: item.CorporateMember ? item.CorporateMember.corporateName : "",
+            english_name: item.IndividualMember ? item.IndividualMember.lastName.toUpperCase() + ", " + item.IndividualMember.firstName : "",
+            chinese_name: item.IndividualMember ? item.IndividualMember.chineseFirstName + " " + item.IndividualMember.chineseLastName : "",
+            fee: item.bookingPrice,
+            id_card: item.IndividualMember ? item.IndividualMember.idCard : "",
+            dob: "",
+            position: "",
+            sign1: "",
+            sign2: ""
+
+          }
+          // Export Attendance Data
+          this.export_attendance.push(obj)
+        })
+        const payload = {
+          info: {
+            course: this.lesson.course.name,
+            lesson: this.lesson.lessonCode,
+            tutor: this.lesson.tutors[0].name,
+            date: this.getDate(this.lesson.startDate),
+            time: this.lesson.startTime + ' - ' + this.lesson.endTime
+          },
+          attendance: this.export_attendance
+        }
+        console.log(payload.info)
+        this.downloading = true
+        const resp = await this.generateAttendance(payload)
+        if(resp && resp !== 0) {
+          this.downloadFile(resp, "Individual Member Receipts")
+        }
+        else {
+          this.downloading = false
+        }
+      }
+    },
+
+    // Get Single Receipt
+    async getSingleReceipt(booking) {
+      const memberIds = [booking.individualMemberId]
+      const bookingIds = [booking.id]
+
+      const payload = {
+        memberIds,
+        bookingIds
+      }
+      this.downloading = true
+      const resp = await this.generateReceipt(payload)
+      if(resp && resp !== 0) {
+        this.downloadFile(resp, "Individual Member Receipts")
+      }
+      else {
+        this.downloading = false
+      }
+    },
+
     // Get All Receipts
     async getReceipts() {
-      // console.log(this.bookings)
       const memberIds = Array.from(this.bookings, booking => booking.individualMemberId)
       const bookingIds = Array.from(this.bookings, booking => booking.id)
 
@@ -259,11 +322,15 @@ export default {
       this.downloading = true
       const resp = await this.generateReceipt(payload)
       if(resp && resp !== 0) {
+        console.log(resp)
         this.downloadFile(resp, "Individual Member Receipts")
+      }
+      else {
+        this.downloading = false
       }
     },
 
-    // Download Receipt
+    // Download File
     downloadFile(link, name){
       this.downloading = true
       axios({
@@ -271,12 +338,14 @@ export default {
           url: link,
           responseType: 'arraybuffer'
       })
-      .then(response => {  
-        this.forceFileDownload(response, name)
+      .then(response => {
+        // this.forceFileDownload(response, name)
       })
-      .catch(() => console.log('error occured'))
+      .catch((err) => console.log(err))
+      this.downloading = false
     },
     forceFileDownload(response, name){
+      console.log("Forcing...")
       const url = window.URL.createObjectURL(new Blob([response.data]))
       const link = document.createElement('a')
       link.href = url
